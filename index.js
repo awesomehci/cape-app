@@ -14,34 +14,34 @@ app.use(expressValidator());
 // Set up DB connection
 var MongoClient = require('mongodb').MongoClient;
 MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
-	if(err) {
-		// Handle error
-		console.log('Error connecting to database: ' + err);
-		return;
-	}
-	console.log('Connected to database server');
+    if(err) {
+        // Handle error
+        console.log('Error connecting to database: ' + err);
+        return;
+    }
+    console.log('Connected to database server');
 
-	// Requests
+    // Requests
     console.log('Loading API request routes...');
-	var papers = require('./requests/papers')(express, db);
-	app.use('/api', papers);
+    var papers = require('./requests/papers')(express, db);
+    app.use('/api', papers);
 
-	// Views
-	// views is directory for all template files
+    // Views
+    // views is directory for all template files
     console.log('Loading views...');
-	app.set('views', __dirname + '/views');
-	app.set('view engine', 'ejs');
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'ejs');
 
-	// Index
-	app.get('/', function(req, res) {
-	  res.render('pages/index');
-	});
+    // Index
+    app.get('/', function(req, res) {
+      res.render('pages/index');
+    });
 
     // Start app
     console.log('Starting express app...');
     app.listen(app.get('port'), function() {
         console.log('Node app is running on port', app.get('port'));
     });
-	
-	//db.close();
+    
+    //db.close();
 });

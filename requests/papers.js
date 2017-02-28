@@ -5,13 +5,13 @@ var util = require('util');
 var mongo = require('mongodb');
 
 module.exports = function(express, db) {
-	var router = express.Router();
+    var router = express.Router();
 
     /**
      * GET /papers
      * Retrieve a list of papers
      */
-	router.get('/papers', function(req, res) {
+    router.get('/papers', function(req, res) {
         // Retrieve list of papers from collection
         db.collection('papers').find({}).toArray(function(err, docs) {
             if (err) {
@@ -22,13 +22,13 @@ module.exports = function(express, db) {
             res.status(200).json({ papers: docs });
             console.log('List papers (Count: ' + docs.length + ')');
         });
-	});
+    });
 
     /**
      * GET /papers/:paperId
      * Retrieve info for a specific paper
      */
-	router.get('/papers/:paperId', function(req, res) {
+    router.get('/papers/:paperId', function(req, res) {
         // Validate data
         req.checkParams('paperId', 'paperId is required').notEmpty();
 
@@ -58,15 +58,15 @@ module.exports = function(express, db) {
                 console.log('Retrieved paper: ' + doc._id);
             });
         });
-	});
+    });
 
     /**
      * POST /papers
      * Create a new paper with the given info
      */
-	router.post('/papers', function(req, res) {
+    router.post('/papers', function(req, res) {
         // Validate data
-		req.checkBody('title', 'title is required').notEmpty();
+        req.checkBody('title', 'title is required').notEmpty();
         req.checkBody('owner', 'owner is required').notEmpty();
 
         req.getValidationResult().then(function(result) {
@@ -101,15 +101,15 @@ module.exports = function(express, db) {
                 console.log('Created paper: ' + result.insertedId);
             });
         });
-	});
+    });
 
     /**
      * PATCH /papers/:paperId
      * Update the info for a paper
      */
-	router.patch('/papers/:paperId', function(req, res) {
+    router.patch('/papers/:paperId', function(req, res) {
         // Validate data
-		req.checkParams('paperId', 'paperId is required').notEmpty();
+        req.checkParams('paperId', 'paperId is required').notEmpty();
 
         req.getValidationResult().then(function(result) {
             if (!result.isEmpty()) {
@@ -122,13 +122,13 @@ module.exports = function(express, db) {
             // TODO CONTINUE
             res.status(501).send('Not Implemented');
         });
-	});
+    });
 
     /**
      * DELETE /papers/:paperId
      * Deletes a specific paper from the collection
      */
-	router.delete('/papers/:paperId', function(req, res) {
+    router.delete('/papers/:paperId', function(req, res) {
         // Validate data
         req.checkParams('paperId', 'paperId is required').notEmpty();
 
@@ -156,7 +156,7 @@ module.exports = function(express, db) {
                 console.log('Deleted paper: ' + req.params.paperId);
             });
         });
-	});
+    });
 
-	return router;
+    return router;
 };
