@@ -37,3 +37,14 @@
 .jumbotron .lang-logo img {
     max-width: 100%;
 }
+
+i {
+    font-style: italic;
+    font-size: 18px;
+    vertical-align: top;
+}
+
+.material-icons {
+    font-size: 18px;
+    vertical-align: top;
+}

@@ -37,3 +37,9 @@
 .jumbotron .lang-logo img {
     max-width: 100%;
 }
+
+
+i {
+    vertical-align: top;
+    font-size:18px;
+}
