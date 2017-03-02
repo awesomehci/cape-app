@@ -11,6 +11,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(expressValidator());
 
+// Redirect to HTTPS (secure)
+if (process.env.NODE_ENV == "production") {
+    console.log('Enable redirect to HTTPS');
+    app.all('*', function (req, res, next) {
+        if (req.headers['x-forwarded-proto'] != 'https') {
+            res.redirect('https://' + req.headers.host + req.url)
+        } else {
+            next();
+        }
+    });
+}
+
 // Set up DB connection
 var MongoClient = require('mongodb').MongoClient;
 MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
