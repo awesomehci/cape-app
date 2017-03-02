@@ -85,8 +85,8 @@ module.exports = function(express, db) {
             }
 
             // Add proofreaders (include responded/status flag)
-            for (var proofreader in req.body.proofreaders) {
-                proofreaders.push({ name: proofreader, responded: false });
+            for (var i in req.body.proofreaders) {
+                newPaper.proofreaders.push({ name: req.body.proofreaders[i], responded: false });
             }
 
             // Insert in collection
