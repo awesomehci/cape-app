@@ -4,6 +4,15 @@ var expressValidator = require('express-validator');
 
 var app = express();
 
+var production = process.env.NODE_ENV == "production";
+console.log('Production Mode: ' + production);
+
+// Load .env for development
+if (!production) {
+    console.log('DEV: Load .env file');
+    require('dotenv').config()
+}
+
 // Set up app
 app.set('port', (process.env.PORT || 5000));
 app.use(express.static(__dirname + '/public'));
@@ -12,8 +21,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(expressValidator());
 
 // Redirect to HTTPS (secure)
-if (process.env.NODE_ENV == "production") {
-    console.log('Enable redirect to HTTPS');
+if (production) {
+    console.log('PROD: Enable redirect to HTTPS');
     app.all('*', function (req, res, next) {
         if (req.headers['x-forwarded-proto'] != 'https') {
             res.redirect('https://' + req.headers.host + req.url)
