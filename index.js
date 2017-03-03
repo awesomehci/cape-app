@@ -1,24 +1,16 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
-
-var app = express();
+var stormpath = require('express-stormpath');
 
 var production = process.env.NODE_ENV == "production";
-console.log('Production Mode: ' + production);
+console.log('Mode: ' + (production ? 'PROD' : 'DEV'));
 
 // Load .env for development
 if (!production) {
     console.log('DEV: Load .env file');
     require('dotenv').config()
 }
-
-// Set up app
-app.set('port', (process.env.PORT || 5000));
-app.use(express.static(__dirname + '/public'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(expressValidator());
 
 // Redirect to HTTPS (secure)
 if (production) {
@@ -33,6 +25,7 @@ if (production) {
 }
 
 // Set up DB connection
+console.log('Connecting to mLab database server...');
 var MongoClient = require('mongodb').MongoClient;
 MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     if(err) {
@@ -41,6 +34,36 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         return;
     }
     console.log('Connected to database server');
+
+    // Set up app
+    console.log('Configuring express application...');
+    var app = express();
+    app.set('port', (process.env.PORT || 5000));
+    app.use(express.static(__dirname + '/public'));
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({extended: true}));
+    app.use(expressValidator());
+
+    // Initialize Stormpath (for user account authentication)
+    console.log('Initializing Stormpath middleware...');
+    var postRegistrationHandler = require('./requests/users').postRegistrationHandler(db)
+
+    app.use(stormpath.init(app, {
+        website: true,
+        web: {
+            login: {
+                form: {
+                    fields: {
+                        login: {
+                            label: 'Email',
+                            placeholder: 'Email'
+                        }
+                    }
+                }
+            }
+        },
+        postRegistrationHandler: postRegistrationHandler
+    }));
 
     // Requests
     console.log('Loading API request routes...');
@@ -61,8 +84,11 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
 
     // Start app
     console.log('Starting express app...');
-    app.listen(app.get('port'), function() {
-        console.log('Node app is running on port', app.get('port'));
+    console.log('Waiting for Stormpath...');
+    app.on('stormpath.ready', function() {
+        app.listen(app.get('port'), function() {
+            console.log('Node app is running on port', app.get('port'));
+        });
     });
     
     //db.close();
