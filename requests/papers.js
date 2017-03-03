@@ -38,6 +38,12 @@ module.exports = function(express, db) {
                 return;
             }
 
+            // Check for valid paperId
+            if (!mongo.ObjectID.isValid(req.params.paperId)) {
+                res.status(400).send('Invalid paperId');
+                return;
+            }
+
             oId = new mongo.ObjectID(req.params.paperId); // Create object id
 
             // Find in database
@@ -86,7 +92,7 @@ module.exports = function(express, db) {
 
             // Add proofreaders (include responded/status flag)
             for (var i in req.body.proofreaders) {
-                newPaper.proofreaders.push({ name: req.body.proofreaders[i], responded: false });
+                newPaper.proofreaders.push({ name: req.body.proofreaders[i], responded: false, url: null });
             }
 
             // Insert in collection
@@ -117,6 +123,12 @@ module.exports = function(express, db) {
                 return;
             }
 
+            // Check for valid paperId
+            if (!mongo.ObjectID.isValid(req.params.paperId)) {
+                res.status(400).send('Invalid paperId');
+                return;
+            }
+
             oId = new mongo.ObjectID(req.params.paperId); // Create object id
 
             // TODO CONTINUE
@@ -135,6 +147,12 @@ module.exports = function(express, db) {
         req.getValidationResult().then(function(result) {
             if (!result.isEmpty()) {
                 res.status(400).send('Bad Request\n' + util.inspect(result.array()));
+                return;
+            }
+
+            // Check for valid paperId
+            if (!mongo.ObjectID.isValid(req.params.paperId)) {
+                res.status(400).send('Invalid paperId');
                 return;
             }
 
