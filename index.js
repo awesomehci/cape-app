@@ -12,6 +12,17 @@ if (!production) {
     require('dotenv').config()
 }
 
+// Set up app
+console.log('Configuring express application...');
+
+var app = express();
+
+app.set('port', (process.env.PORT || 5000));
+app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(expressValidator());
+
 // Redirect to HTTPS (secure)
 if (production) {
     console.log('PROD: Enable redirect to HTTPS');
@@ -34,15 +45,6 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         return;
     }
     console.log('Connected to database server');
-
-    // Set up app
-    console.log('Configuring express application...');
-    var app = express();
-    app.set('port', (process.env.PORT || 5000));
-    app.use(express.static(__dirname + '/public'));
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({extended: true}));
-    app.use(expressValidator());
 
     // Initialize Stormpath (for user account authentication)
     console.log('Initializing Stormpath middleware...');
