@@ -15,7 +15,7 @@ module.exports = function(express, db) {
         // Retrieve list of papers from collection
         db.collection('papers').find({}).toArray(function(err, docs) {
             if (err) {
-                res.status(500).send('Database Error');
+                res.status(500).send('Database Error\n' + err.message);
                 return;
             }
 
@@ -49,7 +49,7 @@ module.exports = function(express, db) {
             // Find in database
             db.collection('papers').findOne({ _id: oId }, function(err, doc) {
                 if (err) {
-                    res.status(500).send('Database Error');
+                    res.status(500).send('Database Error\n' + err.message);
                     return;
                 }
 
@@ -98,7 +98,7 @@ module.exports = function(express, db) {
             // Insert in collection
             db.collection('papers').insertOne(newPaper, function(err, result) {
                 if (err || !result.insertedCount) {
-                    res.status(500).send('Database Error\n' + result.writeError);
+                    res.status(500).send('Database Error\n' + err.message);
                     return;
                 }
 
@@ -161,7 +161,7 @@ module.exports = function(express, db) {
             // Delete paper from collection
             db.collection('papers').deleteOne({ _id: oId }, function(err, result) {
                 if (err) {
-                    res.status(500).send('Database Error\n' + result.writeError);
+                    res.status(500).send('Database Error\n' + err.message);
                     return;
                 }
 
