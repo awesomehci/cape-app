@@ -5,6 +5,8 @@
 
 </head>
 
+
+<!-- TODO: change format to 3 column-->
 <body>
 <script>
     var paperTitle = "";
@@ -12,7 +14,7 @@
     var paperURL = "";
 
     var xhr = new XMLHttpRequest();
-    var url = "https://cape-app.herokuapp.com/api/papers/58b8aec99234103984e0f8d1";
+    var url = "/api/papers/58b8aec99234103984e0f8d1";
     xhr.open("GET", url, true);
 
     //Send the proper header information along with the request
@@ -26,8 +28,7 @@
 
             paperTitle = response.title;
             paperOwner = response.owner;
-            paperURL = "http://docs.google.com/gview?url=" + response.url + "&amp;embedded=true";
-            paperURL = "https://docs.google.com/gview?url=https://capefs.s3.amazonaws.com/1489554375076&amp;embedded=true";
+            paperURL = "http://docs.google.com/gview?url=" + response.url + "&embedded=true";
 
             document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
@@ -125,9 +126,6 @@
 
     <!--Obviously needs to show actual paper -->
     <iframe id="paperIframe" style="width: 100%; height:500px;"></iframe>
-    <!-- <iframe src = "http://docs.google.com/gview?url=http://interoperability.blob.core.windows.net/files/MS-DOCX/[MS-DOCX]-160922.docx" style="width: 100%; height:500px;"></iframe>-->
-    <iframe  src="http://docs.google.com/gview?url=http://interoperability.blob.core.windows.net/files/MS-DOCX/[MS-DOCX]-160922.docx&amp;embedded=true" style="width: 100%; height:500px;"></iframe>
-    <!--<iframe src="https://docs.google.com/gview?url=https://capefs.s3.amazonaws.com/1489554375076&amp;embedded=true" style="width: 100%; height:500px;" onload="resizeIframe(this)"></iframe>-->
 </div>
 
 
