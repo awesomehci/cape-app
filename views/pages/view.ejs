@@ -2,19 +2,67 @@
 <html>
 <head>
     <% include ../partials/header.ejs %>
-    <script>
-        function resizeIframe(obj) {
-            obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
-        }
-    </script>
+
 </head>
 
 <body>
+<script>
+    var paperTitle = "";
+    var paperOwner ="";
+    var paperURL = "";
+
+    var xhr = new XMLHttpRequest();
+    var url = "https://cape-app.herokuapp.com/api/papers/58b8aec99234103984e0f8d1";
+    xhr.open("GET", url, true);
+
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+
+    xhr.onreadystatechange = function() {//Call a function when the state changes.
+
+        if(xhr.readyState == 4 && xhr.status == 200) {
+            var response = JSON.parse(xhr.responseText);
+
+            paperTitle = response.title;
+            paperOwner = response.owner;
+            paperURL = "http://docs.google.com/gview?url=" + response.url + "&amp;embedded=true";
+            paperURL = "https://docs.google.com/gview?url=https://capefs.s3.amazonaws.com/1489554375076&amp;embedded=true";
+
+            document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
+            document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
+            document.getElementById('paperIframe').src = paperURL ;
+            console.log(paperURL);
+
+        }
+    }
+    xhr.send();
+
+    //var paperLoaded = false;
+    //function setSite(){
+    //    if(paperLoaded == false) {
+    //        document.getElementById('paperIframe').src = 'http://lifehacker.com/';
+    //        paperLoaded = true;
+    //    }
+    //}
+
+//    window.onload=function()
+//    {
+        //document.getElementById('paperIframe').src = 'http://www.pdf995.com/samples/pdf.pdf';
+        //setSite();
+//    }
+
+
+
+</script>
+
+
+
 <div class="col-md-6"> <!--splits the page in half-->
     <div class="container">
         <h1>View Paper Status</h1>
-        <h2>Paper Title</h2>
-        <h3>Authors</h3>
+        <h2><span id="paperTitle"></span></h2>
+        <h3><span id="paperOwner"></span></h3>
     </div>
 
 
@@ -76,9 +124,13 @@
     </div>
 
     <!--Obviously needs to show actual paper -->
-    <iframe src="http://docs.google.com/gview?url=https://www.us-cert.gov/sites/default/files/publications/JAR_16-20296A_GRIZZLY%20STEPPE-2016-1229.pdf&embedded=true"
-            style="width: 100%; height:500px;" onload="resizeIframe(this)"></iframe>
+    <iframe id="paperIframe" style="width: 100%; height:500px;"></iframe>
+    <!-- <iframe src = "http://docs.google.com/gview?url=http://interoperability.blob.core.windows.net/files/MS-DOCX/[MS-DOCX]-160922.docx" style="width: 100%; height:500px;"></iframe>-->
+    <iframe  src="http://docs.google.com/gview?url=http://interoperability.blob.core.windows.net/files/MS-DOCX/[MS-DOCX]-160922.docx&amp;embedded=true" style="width: 100%; height:500px;"></iframe>
+    <!--<iframe src="https://docs.google.com/gview?url=https://capefs.s3.amazonaws.com/1489554375076&amp;embedded=true" style="width: 100%; height:500px;" onload="resizeIframe(this)"></iframe>-->
 </div>
+
+
 
 </body>
 </html>
