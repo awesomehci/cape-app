@@ -44,7 +44,7 @@ module.exports = function(express, db) {
                 return;
             }
 
-            oId = new mongo.ObjectID(req.params.paperId); // Create object id
+            var oId = new mongo.ObjectID(req.params.paperId); // Create object id
 
             // Find in database
             db.collection('papers').findOne({ _id: oId }, function(err, doc) {
@@ -58,6 +58,8 @@ module.exports = function(express, db) {
                     res.status(404).send('Paper not found!');
                     return;
                 }
+
+                // TODO Process each paper
 
                 res.status(200).json(doc);
                 console.log(doc);
@@ -82,13 +84,13 @@ module.exports = function(express, db) {
             }
 
             // Make new paper object from POST body
-            newPaper = {
+            var newPaper = {
                 title: req.body.title,
                 owner: req.body.owner,
                 url: req.body.url,
                 preferences: req.body.preferences,
                 proofreaders: []
-            }
+            };
 
             // Add proofreaders (include responded/status flag)
             for (var i in req.body.proofreaders) {
@@ -129,7 +131,7 @@ module.exports = function(express, db) {
                 return;
             }
 
-            oId = new mongo.ObjectID(req.params.paperId); // Create object id
+            var oId = new mongo.ObjectID(req.params.paperId); // Create object id
 
             // TODO CONTINUE
             res.status(501).send('Not Implemented');
@@ -156,7 +158,7 @@ module.exports = function(express, db) {
                 return;
             }
 
-            oId = new mongo.ObjectID(req.params.paperId); // Create object id
+            var oId = new mongo.ObjectID(req.params.paperId); // Create object id
 
             // Delete paper from collection
             db.collection('papers').deleteOne({ _id: oId }, function(err, result) {
