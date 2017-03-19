@@ -8,7 +8,7 @@
 <body>
 <script>
     var paperTitle = "";
-    var paperOwner ="";
+    var paperOwner = "";
     var paperURL = "";
     var preferences;
     var meeds;
@@ -21,22 +21,26 @@
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.setRequestHeader("Accept", "application/json");
 
-    xhr.onreadystatechange = function() {//Call a function when the state changes.
+    xhr.onreadystatechange = function () {//Call a function when the state changes.
 
-        if(xhr.readyState == 4 && xhr.status == 200) {
+        if (xhr.readyState == 4 && xhr.status == 200) {
             var response = JSON.parse(xhr.responseText);
+            //console.log(response);
 
             paperTitle = response.title;
             paperOwner = response.owner;
             paperURL = "http://docs.google.com/gview?url=" + response.url + "&embedded=true";
             preferences = response.preferences;
-            console.log(preferences);
+            //console.log(preferences);
 
             document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
-            document.getElementById('paperIframe').src = paperURL ;
+            document.getElementById('paperIframe').src = paperURL;
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
             //console.log(paperURL);
+            //CreateTableFromJSON();
+            generate_table(response.proofreaders);
+
 
         }
     }
@@ -45,7 +49,7 @@
         // Create the list element:
         var list = document.createElement('ul');
 
-        for(var i = 0; i < array.length; i++) {
+        for (var i = 0; i < array.length; i++) {
             // Create the list item:
             var item = document.createElement('li');
             // Set its contents:
@@ -58,13 +62,71 @@
     }
 
 
-    window.onload=function()
-    {
+    function generate_table(array) {
+        console.log(array);
+        console.log(array[0]);
+        console.log(array[0].name);
+        // creates a <table> element and a <tbody> element
+        var tbl = document.createElement("table");
+        tbl.className="table table-striped";
+
+        var tblBody = document.createElement("tbody");
+
+        //Create header
+        var col = ["Status", "Proofreader", "Comments & Edits"];
+        var tr = tbl.insertRow(-1);
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+
+        // creating all cells
+        for (var i = 0; i < array.length; i++) {
+            // creates a table row
+            var row = document.createElement("tr");
+            var statusCell = document.createElement("td");
+            var nameCell = document.createElement("td");
+            var urlCell = document.createElement("td");
+            var cellText; //holder
+
+
+            cellText = document.createTextNode(array[i].responded);
+            statusCell.appendChild(cellText);
+
+            cellText = document.createTextNode(array[i].name);
+            nameCell.appendChild(cellText);
+
+            cellText = document.createTextNode(array[i].url);
+            urlCell.appendChild(cellText);
+
+            row.appendChild(statusCell);
+            row.appendChild(nameCell);
+            row.appendChild(urlCell);
+
+
+
+            // add the row to the end of the table body
+            tblBody.appendChild(row);
+        }
+
+        // put the <tbody> in the <table>
+        tbl.appendChild(tblBody);
+        // appends <table> into <body>
+        document.getElementById("showData").appendChild(tbl);
+    }
+
+
+
+
+
+    window.onload = function () {
         xhr.send();
     }
 
 </script>
-
 
 
 <div class="col-md-6"> <!--splits the page in half-->
@@ -92,26 +154,48 @@
         </div>
 
         <div>
-            <h3>Proofreaders</h3>
-            <div class="row">
-                <div class="col-md-3">
-                    <ul class="list-unstyled">
-                        <li><i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>Jane Doe</li>
-                        <li><i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>John Smith</li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <ul class="list-unstyled">
-                        <li><i class="material-icons" style="vertical-align: top; align: left; font-size:18px">file_upload</i></span></li>
-                        <li><a href="">FileName.docx</a></li>
-                    </ul>
-                </div>
-            </div>
 
 
             <div>
-                <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go to
-                    Account</a>
+
+
+
+                <h3>Proofreaders</h3>
+                <div id="showData"></div>
+                
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Proofreader</th>
+                        <th>Comments & Edits</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+
+                        <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>
+                        </td>
+                        <td>Jane Doe</td>
+                        <td><i class="material-icons" style="vertical-align: top; align: left; font-size:18px">file_upload</i>
+                        </td>
+                    </tr>
+                    <tr>
+
+                        <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i></td>
+                        <td>John Smith</td>
+                        <td><a href="">FileName.docx</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+                <div>
+                    <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
+                        to
+                        Account</a>
+                </div>
             </div>
         </div>
     </div>
@@ -124,7 +208,11 @@
     </div>
 
     <!--Obviously needs to show actual paper -->
-    <iframe id="paperIframe" style="width: 100%; height:500px;"></iframe>
+
+    <div class="embed-responsive embed-responsive-4by3">
+        <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;"></iframe>
+    </div>
+
 </div>
 
 </body>
