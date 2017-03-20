@@ -19,9 +19,6 @@ module.exports = function(express, db) {
                 return;
             }
 
-            // TODO Preprocess each paper (expand owner and proofreaders)
-            // TODO Difficult
-
             res.status(200).json({ papers: docs });
             console.log('List papers (Count: ' + docs.length + ')');
         });
@@ -62,9 +59,6 @@ module.exports = function(express, db) {
                     return;
                 }
 
-                // TODO Preprocess paper (expand owner and proofreaders)
-                // TODO Easy
-
                 res.status(200).json(doc);
                 console.log(doc);
                 console.log('Retrieved paper: ' + doc._id);
@@ -87,31 +81,56 @@ module.exports = function(express, db) {
                 return;
             }
 
-            // Make new paper object from POST body
-            var newPaper = {
-                title: req.body.title,
-                owner: req.body.owner,
-                url: req.body.url,
-                preferences: req.body.preferences,
-                needs: req.body.needs,
-                proofreaders: [] // List of user ids
-            };
-
-            // Add proofreaders (include responded/status flag)
-            for (var i in req.body.proofreaders) {
-                newPaper.proofreaders.push({ user: req.body.proofreaders[i], responded: false, url: null });
+            // Check for valid owner Id
+            if (!mongo.ObjectID.isValid(req.body.owner)) {
+                res.status(400).send('Invalid owner');
+                return;
             }
 
-            // Insert in collection
-            db.collection('papers').insertOne(newPaper, function(err, result) {
-                if (err || !result.insertedCount) {
+            // Get owner data (insert into paper)
+            var oId = new mongo.ObjectID(req.body.owner); // Create object id
+            db.collection('users').findOne({ _id: oId }, {fields: {account: 0, email: 0}}, function(err, doc) {
+                if (err) {
                     res.status(500).send('Database Error\n' + err.message);
                     return;
                 }
 
-                res.status(201).json(result.ops[0]);
-                console.log(result.ops[0]);
-                console.log('Created paper: ' + result.insertedId);
+                // No matching paper was found
+                if (!doc) {
+                    res.status(404).send('Owner not found!');
+                    return;
+                }
+
+                // Make new paper object from POST body
+                var newPaper = {
+                    title: req.body.title,
+                    owner: doc,
+                    url: req.body.url,
+                    preferences: req.body.preferences,
+                    needs: req.body.needs,
+                    proofreaders: [] // List of user ids
+                };
+
+                // Get proofreaders from database
+                var oIds = req.body.proofreaders.map(function(x) { return new mongo.ObjectId(x); });
+                db.collection('users').find({_id: {$in: oIds}}, {fields: {account: 0, email: 0}}).toArray(function(err, docs) {
+                    // Make list of proofreaders (user, responded, url)
+                    for (var i in docs) {
+                        newPaper.proofreaders.push({ user: docs[i], responded: false, url: null });
+                    }
+
+                    // Insert in collection
+                    db.collection('papers').insertOne(newPaper, function(err, result) {
+                        if (err || !result.insertedCount) {
+                            res.status(500).send('Database Error\n' + err.message);
+                            return;
+                        }
+
+                        res.status(201).json(result.ops[0]);
+                        console.log(result.ops[0]);
+                        console.log('Created paper: ' + result.insertedId);
+                    });
+                });
             });
         });
     });
@@ -180,8 +199,6 @@ module.exports = function(express, db) {
                 res.status(200).send('Paper Deleted');
                 console.log('Deleted paper: ' + req.params.paperId);
             });
-
-            // TODO Also delete from user's list of papers
         });
     });
 

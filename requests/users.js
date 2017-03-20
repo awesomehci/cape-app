@@ -142,13 +142,12 @@ module.exports.router = function(express, db, stormpath) {
             }
 
             // Find in database
-            db.collection('users').find({ owner: req.params.userId }).toArray(function(err, docs) {
+            var oId = new mongo.ObjectID(req.params.userId);
+            db.collection('papers').find({ "owner._id": oId }).toArray(function(err, docs) {
                 if (err) {
                     res.status(500).send('Database Error\n' + err.message);
                     return;
                 }
-
-                // TODO Expand papers for owner and proofreaders
 
                 res.status(200).json({ papers: docs });
                 console.log('List papers (Count: ' + docs.length + ')');
@@ -163,8 +162,31 @@ module.exports.router = function(express, db, stormpath) {
     router.get('/users/:userId/proofreads', function(req, res) {
         // Validate data
         req.checkParams('userId', 'userId is required').notEmpty();
-        // TODO Query DB for all papers where userId is in proofreaders list (then preprocess)
-        // .find({ proofreaders: userId }, ...)
+
+        req.getValidationResult().then(function(result) {
+            if (!result.isEmpty()) {
+                res.status(400).send('Bad Request');
+                return;
+            }
+
+            // Check for valid paperId
+            if (!mongo.ObjectID.isValid(req.params.userId)) {
+                res.status(400).send('Invalid userId');
+                return;
+            }
+
+            // Find in database
+            var oId = new mongo.ObjectID(req.params.userId);
+            db.collection('papers').find({ "proofreaders.user._id": oId }).toArray(function(err, docs) {
+                if (err) {
+                    res.status(500).send('Database Error\n' + err.message);
+                    return;
+                }
+
+                res.status(200).json({ proofreads: docs });
+                console.log('List proofreads (Count: ' + docs.length + ')');
+            });
+        });
     });
 
     return router;
