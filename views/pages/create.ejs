@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/header.ejs %>
+    <script src="js/s3_upload.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        function onFormSubmit() {
+            // TODO Validate input
+
+            // Going to attempt creation; disable buttons
+            $('#submitBtn').prop('disabled', true);
+            $('#cancelBtn').prop('disabled', true);
+
+            // Get file from picker
+            var file = document.getElementById('uploadPaper').files[0];
+            if (file == null) {
+                return alert('No file selected.');
+            }
+
+            // Check file size
+            if (file.size > 16777216) { // 16 MB
+                return alert('File size must be < 16 MB!');
+            }
+
+            uploadFile(file, function(url) {
+                // Get user ID
+                $.getJSON('/api/user', function(user) {
+                    // Get list of checked preferences/needs
+                    var prefList = [];
+                    var prefChecks = $('#preferenceForm').find('input:checkbox:checked').toArray();
+                    for (var i in prefChecks) {
+                        prefList.push(prefChecks[i].value);
+                    }
+
+                    var needList = [];
+                    var needChecks = $('#needForm').find('input:checkbox:checked').toArray();
+                    for (var i in needChecks) {
+                        needList.push(needChecks[i].value);
+                    }
+
+                    // Get list of proofreaders
+                    var proofList = [];
+                    proofList.push(user._id); // TODO Need to get real proofreaders
+
+                    // Make paper JSON
+                    var paper = {
+                        title: $('#paperTitle').val(),
+                        owner: user._id,
+                        url: url,
+                        preferences: prefList,
+                        needs: needList,
+                        proofreaders: proofList
+                    };
+
+                    // Post paper to server
+                    $.ajax('/api/papers', {
+                        type: 'POST',
+                        data: JSON.stringify(paper),
+                        contentType: 'application/json',
+                        success: function(data) {
+                            // TODO Check for failure
+                            console.log('success');
+                            // TODO Success redirect
+                            $(location).attr('href', '/'); // TODO Redirect to view paper
+                        },
+                        failure: function(data) {
+                            alert('Paper creation failed!');
+                        }
+                    });
+                });
+            });
+        }
+
+        $(document).ready(function() {
+            // TODO Get list of proofreaders and create list
+
+            // Store data: $('#myElId').data('nameYourData', { foo: 'bar' });
+            // Retrieve data: var myData = $('#myElId').data('nameYourData');
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <h1 class="text-center">Create Paper</h1>
+            <hr />
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <form>
+                    <div class="form-group">
+                        <label for="paperTitle">Paper Title</label>
+                        <input type="text" class="form-control" id="paperTitle" placeholder="My Paper">
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadPaper">Upload Paper</label>
+                        <input type="file" id="uploadPaper">
+                        <p class="help-block">Accepted files: .doc, .docx, .pdf; File size: &lt;16 MB</p>
+                    </div>
+                </form>
+                <!-- TODO Insert editable title field -->
+                <hr />
+            </div>
+        </div>
+        <div class="row">
+            <h3 class="text-center">Proofreaders</h3>
+            <div class="col-md-6 col-md-offset-3">
+                <hr />
+                <!-- TODO Proofreaders list -->
+                <div class="center-block">
+                    <ul id="preadersSelected">
+                        <li>No proofreaders selected.</li>
+                    </ul>
+                </div>
+                <div class="dropdown center-block">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="preadersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select proofreaders
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="preadersDropdown" id="preadersList">
+                        <li><a href="#">John Smith</a></li>
+                        <li><a href="#">Suzanne Doe</a></li>
+                        <!-- TODO To correlate which item is clicked: id="1" onClick="reply_click(this.id)" -->
+                    </ul>
+                </div>
+                <hr />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 col-md-offset-1">
+                <h3 class="text-center">Preferences</h3>
+                <hr />
+                <form id="preferenceForm">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="I am ok with direct edits">
+                            I am ok with direct edits
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="I want proofreaders to use Track Changes">
+                            I want proofreaders to use Track Changes
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="Proofreaders should always comment changes">
+                            Proofreaders should always comment changes
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="I only want comments">
+                            I only want comments
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-5">
+                <h3 class="text-center">Proofreading Needs</h3>
+                <hr />
+                <form id="needForm">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="I need help with grammar">
+                            I need help with grammar
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="I need help with content">
+                            I need help with content
+                        </label>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="I need help soon">
+                            I need help soon
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <hr />
+                <button type="button" class="btn btn-primary btn-lg" id="submitBtn" onclick="onFormSubmit()">Submit</button>
+                <button type="button" class="btn btn-default btn-lg" id="cancelBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

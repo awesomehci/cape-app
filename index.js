@@ -67,10 +67,48 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         postRegistrationHandler: postRegistrationHandler
     }));
 
+    // Set up AWS S3 storage
+    console.log('Connecting to AWS services...');
+    var aws = require('aws-sdk');
+
+    app.get('/sign-s3', function(req, res) {
+        var fileName = req.query['file-name'];
+        var fileType = req.query['file-type'];
+
+        var s3Params = {
+            Bucket: process.env.S3_BUCKET,
+            Key: fileName,
+            Expires: 60,
+            ContentType: fileType,
+            ACL: 'public-read'
+        };
+
+        var s3 = new aws.S3();
+        s3.getSignedUrl('putObject', s3Params, (err, data) => {
+            if (err) {
+                console.log('Error getting signed URL');
+                console.log(err);
+                res.end()
+                return;
+            }
+
+            var returnData = {
+                signedRequest: data,
+                url: `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${fileName}`
+            };
+
+            console.log('Ready to upload: ' + returnData.url);
+            res.send(JSON.stringify(returnData));
+        });
+    });
+
     // Requests
     console.log('Loading API request routes...');
     var papers = require('./requests/papers')(express, db);
+    var users = require('./requests/users').router(express, db, stormpath);
+
     app.use('/api', papers);
+    app.use('/api', users);
 
     // Views
     // views is directory for all template files
@@ -84,6 +122,11 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         res.render('pages/view'); // TODO redirect to test view page
     });
 
+    // Create paper
+    app.get('/create', stormpath.authenticationRequired, function(req, res) {
+        res.render('pages/create');
+    });
+
     // Start app
     console.log('Starting express app...');
     console.log('Waiting for Stormpath...');
@@ -92,6 +135,6 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
             console.log('Node app is running on port', app.get('port'));
         });
     });
-    
+
     //db.close();
 });

@@ -19,6 +19,9 @@ module.exports = function(express, db) {
                 return;
             }
 
+            // TODO Preprocess each paper (expand owner and proofreaders)
+            // TODO Difficult
+
             res.status(200).json({ papers: docs });
             console.log('List papers (Count: ' + docs.length + ')');
         });
@@ -59,7 +62,8 @@ module.exports = function(express, db) {
                     return;
                 }
 
-                // TODO Process each paper
+                // TODO Preprocess paper (expand owner and proofreaders)
+                // TODO Easy
 
                 res.status(200).json(doc);
                 console.log(doc);
@@ -89,12 +93,13 @@ module.exports = function(express, db) {
                 owner: req.body.owner,
                 url: req.body.url,
                 preferences: req.body.preferences,
-                proofreaders: []
+                needs: req.body.needs,
+                proofreaders: [] // List of user ids
             };
 
             // Add proofreaders (include responded/status flag)
             for (var i in req.body.proofreaders) {
-                newPaper.proofreaders.push({ name: req.body.proofreaders[i], responded: false, url: null });
+                newPaper.proofreaders.push({ user: req.body.proofreaders[i], responded: false, url: null });
             }
 
             // Insert in collection
@@ -175,6 +180,8 @@ module.exports = function(express, db) {
                 res.status(200).send('Paper Deleted');
                 console.log('Deleted paper: ' + req.params.paperId);
             });
+
+            // TODO Also delete from user's list of papers
         });
     });
 
