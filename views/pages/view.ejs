@@ -35,6 +35,7 @@
             paperTitle = response.title;
             paperOwner = response.owner.fullName;
             paperURL = "http://docs.google.com/gview?url=" + response.url + "&embedded=true";
+            downloadURL = response.url;
             preferences = response.preferences;
             needs = response.needs;
             //console.log(preferences);
@@ -42,6 +43,7 @@
             document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
             document.getElementById('paperIframe').src = paperURL;
+            document.getElementById('download_button').href = downloadURL;
             //console.log(paperURL);
 
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
@@ -184,14 +186,15 @@
                 };
 
                 // Post paper to server
-                $.ajax('/api/papers/paperId/uploadProofread', {
+                $.ajax('/api/papers/'+ paper_id +'/uploadProofread', {
                     type: 'POST',
                     data: JSON.stringify(paper),
                     contentType: 'application/json',
                     success: function(data) {
                         console.log('success');
                         // TODO Success redirect
-                        $(location).attr('href', '/'); // TODO Redirect to view paper
+                        //$(location).attr('href', '/view/'+paper_id); // TODO Redirect to view paper
+                        window.location.reload();
                     },
                     failure: function(data) {
                         alert('Paper creation failed!');
@@ -223,7 +226,7 @@
          <div id="showData"></div>
 
         <div>
-            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Back to Account</a>
+            <a type="button" class="btn btn-primary" href="/">Back to Account</a>
         </div>
     </div>
 </div>
@@ -231,7 +234,7 @@
 
 <div class="col-md-6">
         <div>
-            <a type="button" class="btn btn-primary btn-lg btn-block" href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
+            <a id = "download_button" type="button" class="btn btn-primary btn-lg btn-block" href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
         </div>
 
     <div class="embed-responsive embed-responsive-4by3">
