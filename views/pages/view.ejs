@@ -2,69 +2,182 @@
 <html>
 <head>
     <% include ../partials/header.ejs %>
-    <script>
-        function resizeIframe(obj) {
-            obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
-        }
-    </script>
 </head>
 
+<!-- TODO: change format to 3 column-->
 <body>
+<script>
+    var paperTitle = "";
+    var paperOwner = "";
+    var paperURL = "";
+    var preferences;
+    var meeds;
+
+    var xhr = new XMLHttpRequest();
+    var url = "/api/papers/58b8aec99234103984e0f8d1";
+    xhr.open("GET", url, true);
+
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+
+    xhr.onreadystatechange = function () {//Call a function when the state changes.
+
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log(response);
+
+            paperTitle = response.title;
+            paperOwner = response.owner;
+            paperURL = "http://docs.google.com/gview?url=" + response.url + "&embedded=true";
+            preferences = response.preferences;
+            //console.log(preferences);
+
+            document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
+            document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
+            document.getElementById('paperIframe').src = paperURL;
+
+            document.getElementById('preferencelist').appendChild(makeUL(preferences));
+            //console.log(paperURL);
+            //CreateTableFromJSON();
+            generate_table(response.proofreaders);
+
+            //Set icons of status cells
+            document.getElementById('status_cell_false').innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
+            document.getElementById("status_cell_true").innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
+
+        }
+    }
+
+    function makeUL(array) {
+        // Create the list element:
+        var list = document.createElement('ul');
+
+        for (var i = 0; i < array.length; i++) {
+            // Create the list item:
+            var item = document.createElement('li');
+            // Set its contents:
+            item.appendChild(document.createTextNode(array[i]));
+            // Add it to the list:
+            list.appendChild(item);
+        }
+        // Finally, return the constructed list:
+        return list;
+    }
+
+
+    function generate_table(array) {
+        var tbl = document.createElement("table");
+        tbl.className = "table table-striped";
+
+        var tblBody = document.createElement("tbody");
+
+        //Create header
+        var col = ["Status", "Proofreader", "Comments & Edits"];
+        var tr = tbl.insertRow(-1);
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // creating all cells
+        for (var i = 0; i < array.length; i++) {
+            // creates a table row
+            var row = document.createElement("tr");
+            var statusCell = document.createElement("td");
+            var nameCell = document.createElement("td");
+            var urlCell = document.createElement("td");
+            var cellText; //holder
+
+            //Setting IDs so that the status symbol will show up
+            if (array[i].responded == false) {statusCell.setAttribute("id", "status_cell_false");}
+            else {statusCell.setAttribute("id", "status_cell_true");}
+
+            cellText = document.createTextNode(array[i].name);
+            nameCell.appendChild(cellText);
+
+            if (array[i].url == null) {
+                var btn = document.createElement('input');
+                btn.type = "button";
+                btn.className = "btn";
+                btn.value = "Upload Document";
+                btn.onclick = (function () {
+                    return function () {
+                        //Todo open file chooser that does upload
+                        console.log("button clicked");
+                    }
+                });
+                urlCell.appendChild(btn);
+            }
+            else {
+                var link = document.createElement("a");
+                link.setAttribute("href", array[i].url)
+                //link.className = "someCSSclass";
+
+                var linkText = document.createTextNode(array[i].url);
+                link.appendChild(linkText);
+
+                // Add the link to the previously created TableCell.
+                urlCell.appendChild(link);
+            }
+
+            row.appendChild(statusCell);
+            row.appendChild(nameCell);
+            row.appendChild(urlCell);
+
+            // add the row to the end of the table body
+            tblBody.appendChild(row);
+        }
+
+        // put the <tbody> in the <table>
+        tbl.appendChild(tblBody);
+        // appends <table> into <body>
+        document.getElementById("showData").appendChild(tbl);
+    }
+
+
+    function replace_icons(array) {
+
+    }
+
+
+    window.onload = function () {
+        xhr.send();
+    }
+
+</script>
+
+
 <div class="col-md-6"> <!--splits the page in half-->
     <div class="container">
         <h1>View Paper Status</h1>
-        <h2>Paper Title</h2>
-        <h3>Authors</h3>
+        <h2><span id="paperTitle"></span></h2>
+        <h3><span id="paperOwner"></span></h3>
     </div>
 
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h3>Preferences</h3>
-                <ul>
-                    <li>
-                        I am ok with direct edits
-                    </li>
+        <h3>Preferences</h3>
+        <div id="preferencelist"></div>
 
-                    <li>
-                        I want proofreaders to use Track Changes
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <h3>Proofreading Needs</h3>
-                <ul>
-                    <li>
-                        I need help with grammar
-                    </li>
-                </ul>
-                </ul>
-            </div>
-        </div>
-
+        <h3>Proofreading Needs</h3>
+        <ul>
+            <li>
+                I need help with grammar
+            </li>
+        </ul>
         <div>
             <h3>Proofreaders</h3>
-            <div class="row">
-                <div class="col-md-3">
-                    <ul class="list-unstyled">
-                        <li><i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>Jane Doe</li>
-                        <li><i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>John Smith</li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <ul class="list-unstyled">
-                        <li><i class="material-icons" style="vertical-align: top; align: left; font-size:18px">file_upload</i></span></li>
-                        <li><a href="">FileName.docx</a></li>
-                    </ul>
-                </div>
-            </div>
+            <div id="showData"></div>
+        </div>
 
 
-            <div>
-                <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go to
-                    Account</a>
-            </div>
+        <div>
+            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
+                to
+                Account</a>
         </div>
     </div>
 </div>
@@ -76,8 +189,11 @@
     </div>
 
     <!--Obviously needs to show actual paper -->
-    <iframe src="http://docs.google.com/gview?url=https://www.us-cert.gov/sites/default/files/publications/JAR_16-20296A_GRIZZLY%20STEPPE-2016-1229.pdf&embedded=true"
-            style="width: 100%; height:500px;" onload="resizeIframe(this)"></iframe>
+
+    <div class="embed-responsive embed-responsive-4by3">
+        <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;"></iframe>
+    </div>
+
 </div>
 
 </body>
