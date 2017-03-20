@@ -7,14 +7,18 @@
 <!-- TODO: change format to 3 column-->
 <body>
 <script>
+    var paper_id = "<%= paper_id %>";
+    console.log(paper_id);
+
+
     var paperTitle = "";
     var paperOwner = "";
     var paperURL = "";
     var preferences;
-    var meeds;
+    var needs;
 
     var xhr = new XMLHttpRequest();
-    var url = "/api/papers/58b8aec99234103984e0f8d1";
+    var url = "/api/papers/" + paper_id;
     xhr.open("GET", url, true);
 
     //Send the proper header information along with the request
@@ -28,24 +32,28 @@
             console.log(response);
 
             paperTitle = response.title;
-            paperOwner = response.owner;
+            paperOwner = response.owner.fullName;
             paperURL = "http://docs.google.com/gview?url=" + response.url + "&embedded=true";
             preferences = response.preferences;
+            needs = response.needs;
             //console.log(preferences);
 
             document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
             document.getElementById('paperIframe').src = paperURL;
+            console.log(paperURL);
 
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
-            //console.log(paperURL);
-            //CreateTableFromJSON();
+            document.getElementById('needlist').appendChild(makeUL(needs));
             generate_table(response.proofreaders);
 
             //Set icons of status cells
-            document.getElementById('status_cell_false').innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
-            document.getElementById("status_cell_true").innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
-
+            if(document.body.contains(document.getElementById('status_cell_false'))){
+                document.getElementById('status_cell_false').innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
+            }
+            if(document.body.contains(document.getElementById('status_cell_true'))){
+                document.getElementById("status_cell_true").innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
+            }
         }
     }
 
@@ -95,7 +103,7 @@
             if (array[i].responded == false) {statusCell.setAttribute("id", "status_cell_false");}
             else {statusCell.setAttribute("id", "status_cell_true");}
 
-            cellText = document.createTextNode(array[i].name);
+            cellText = document.createTextNode(array[i].user.fullName);
             nameCell.appendChild(cellText);
 
             if (array[i].url == null) {
@@ -113,7 +121,9 @@
             }
             else {
                 var link = document.createElement("a");
-                link.setAttribute("href", array[i].url)
+                //link.setAttribute("href", array[i].url, "download", array[i].url);
+                link.setAttribute("href", array[i].url);
+
                 //link.className = "someCSSclass";
 
                 var linkText = document.createTextNode(array[i].url);
@@ -138,10 +148,6 @@
     }
 
 
-    function replace_icons(array) {
-
-    }
-
 
     window.onload = function () {
         xhr.send();
@@ -150,50 +156,38 @@
 </script>
 
 
-<div class="col-md-6"> <!--splits the page in half-->
-    <div class="container">
+<div class="col-md-6">
+    <div class="container-fluid">
         <h1>View Paper Status</h1>
         <h2><span id="paperTitle"></span></h2>
         <h3><span id="paperOwner"></span></h3>
-    </div>
 
-
-    <div class="container">
         <h3>Preferences</h3>
         <div id="preferencelist"></div>
 
         <h3>Proofreading Needs</h3>
-        <ul>
-            <li>
-                I need help with grammar
-            </li>
-        </ul>
-        <div>
-            <h3>Proofreaders</h3>
-            <div id="showData"></div>
-        </div>
+        <div id="needlist"></div>
 
+         <h3>Proofreaders</h3>
+         <div id="showData"></div>
 
         <div>
-            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
-                to
-                Account</a>
+            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go to Account</a>
         </div>
     </div>
 </div>
 
 
-<div class="col-md-6"> <!--splits the page in half-->
+<div class="col-md-6">
     <div class="container">
-        <span class="glyphicon glyphicon-save"></span>
+        <div>
+            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
+        </div>
     </div>
-
-    <!--Obviously needs to show actual paper -->
 
     <div class="embed-responsive embed-responsive-4by3">
         <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;"></iframe>
     </div>
-
 </div>
 
 </body>

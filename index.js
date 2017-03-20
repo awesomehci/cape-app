@@ -117,9 +117,9 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     app.set('view engine', 'ejs');
 
     // Index
-    app.get('/', function(req, res) {
+    app.get('/view/:paper_id', function(req, res) {
         //res.render('pages/index');
-        res.render('pages/view'); // TODO redirect to test view page
+        res.render('pages/view', {paper_id: req.params.paper_id}); // TODO redirect to test view page
     });
 
     // Create paper
