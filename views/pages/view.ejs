@@ -25,7 +25,7 @@
 
         if (xhr.readyState == 4 && xhr.status == 200) {
             var response = JSON.parse(xhr.responseText);
-            //console.log(response);
+            console.log(response);
 
             paperTitle = response.title;
             paperOwner = response.owner;
@@ -36,6 +36,7 @@
             document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
             document.getElementById('paperIframe').src = paperURL;
+
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
             //console.log(paperURL);
             //CreateTableFromJSON();
@@ -63,12 +64,12 @@
 
 
     function generate_table(array) {
-        console.log(array);
-        console.log(array[0]);
-        console.log(array[0].name);
+        //console.log(array);
+        //console.log(array[0]);
+        //console.log(array[0].name);
         // creates a <table> element and a <tbody> element
         var tbl = document.createElement("table");
-        tbl.className="table table-striped";
+        tbl.className = "table table-striped";
 
         var tblBody = document.createElement("tbody");
 
@@ -106,8 +107,6 @@
             row.appendChild(nameCell);
             row.appendChild(urlCell);
 
-
-
             // add the row to the end of the table body
             tblBody.appendChild(row);
         }
@@ -117,9 +116,6 @@
         // appends <table> into <body>
         document.getElementById("showData").appendChild(tbl);
     }
-
-
-
 
 
     window.onload = function () {
@@ -138,66 +134,53 @@
 
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h3>Preferences</h3>
-                <div id="preferencelist"></div>
-            </div>
-            <div class="col-md-6">
-                <h3>Proofreading Needs</h3>
-                <ul>
-                    <li>
-                        I need help with grammar
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div>
+        <h3>Preferences</h3>
+        <div id="preferencelist"></div>
+    </div>
+    <h3>Proofreading Needs</h3>
+    <ul>
+        <li>
+            I need help with grammar
+        </li>
+    </ul>
+    <div>
 
 
-            <div>
+        <h3>Proofreaders</h3>
+        <div id="showData"></div>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Status</th>
+                <th>Proofreader</th>
+                <th>Comments & Edits</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+
+                <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>
+                </td>
+                <td>Jane Doe</td>
+                <td><i class="material-icons" style="vertical-align: top; align: left; font-size:18px">file_upload</i>
+                </td>
+            </tr>
+            <tr>
+
+                <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i></td>
+                <td>John Smith</td>
+                <td><a href="">FileName.docx</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
 
-
-                <h3>Proofreaders</h3>
-                <div id="showData"></div>
-
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Proofreader</th>
-                        <th>Comments & Edits</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-
-                        <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>
-                        </td>
-                        <td>Jane Doe</td>
-                        <td><i class="material-icons" style="vertical-align: top; align: left; font-size:18px">file_upload</i>
-                        </td>
-                    </tr>
-                    <tr>
-
-                        <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i></td>
-                        <td>John Smith</td>
-                        <td><a href="">FileName.docx</a></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-
-                <div>
-                    <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
-                        to
-                        Account</a>
-                </div>
-            </div>
-        </div>
+    <div>
+        <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
+            to
+            Account</a>
     </div>
 </div>
 
