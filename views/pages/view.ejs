@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="js/s3_upload.js"></script>
+    <script src="/js/s3_upload.js"></script>
     <% include ../partials/header.ejs %>
 </head>
 
@@ -9,7 +9,7 @@
 <body>
 <script>
     var paper_id = "<%= paper_id %>";
-    console.log(paper_id);
+    //console.log(paper_id);
 
 
     var paperTitle = "";
@@ -30,7 +30,7 @@
 
         if (xhr.readyState == 4 && xhr.status == 200) {
             var response = JSON.parse(xhr.responseText);
-            console.log(response);
+            //console.log(response);
 
             paperTitle = response.title;
             paperOwner = response.owner.fullName;
@@ -42,7 +42,7 @@
             document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
             document.getElementById('paperIframe').src = paperURL;
-            console.log(paperURL);
+            //console.log(paperURL);
 
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
             document.getElementById('needlist').appendChild(makeUL(needs));
@@ -107,13 +107,35 @@
             cellText = document.createTextNode(array[i].user.fullName);
             nameCell.appendChild(cellText);
 
-            if (array[i].url == null) {
-                var choose_file = document.createElement("input");
-                choose_file.setAttribute("type", "file");
-                choose_file.setAttribute("id", "uploadPaper");
-                choose_file.onchange = onChange;
 
-                urlCell.appendChild(choose_file);
+            console.log("Array" + array);
+
+
+            if (array[i].url == null) {
+                var proofreader = array[i].user._id;
+                $.getJSON('/api/user', function(user) {
+                    // Make paper JSON
+                    //if(user._id == )
+                    console.log("User " + proofreader);
+                    console.log("User " + user._id);
+
+                    if(user._id == proofreader)
+                    {
+                        var choose_file = document.createElement("input");
+                        choose_file.setAttribute("type", "file");
+                        choose_file.setAttribute("id", "uploadPaper");
+                        choose_file.onchange = onChange;
+
+                        urlCell.appendChild(choose_file);
+                    }
+
+                    else{
+                        cellText = document.createTextNode("");
+                        console.log("user is not logged in");
+                        urlCell.appendChild(cellText);
+                    }
+                });
+
             }
             else {
                 var link = document.createElement("a");
