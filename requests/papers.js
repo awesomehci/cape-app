@@ -136,6 +136,49 @@ module.exports = function(express, db) {
     });
 
     /**
+     * POST /papers/:paperId/uploadProofread
+     * Updates the paper with a proofreader's uploaded copy
+     */
+    router.post('/papers/:paperId/uploadProofread', function(req, res) {
+        // Validate data
+        req.checkBody('proofreader', 'proofreader is required').notEmpty();
+        req.checkBody('url', 'url is required').notEmpty();
+
+        req.getValidationResult().then(function(result) {
+            if (!result.isEmpty()) {
+                res.status(400).send('Bad Request\n' + util.inspect(result.array()));
+                return;
+            }
+
+            // Check for valid paperId
+            if (!mongo.ObjectID.isValid(req.params.paperId)) {
+                res.status(400).send('Invalid paperId');
+                return;
+            }
+
+            // Check for valid proofreaderId
+            if (!mongo.ObjectID.isValid(req.body.proofreader)) {
+                res.status(400).send('Invalid proofreaderId');
+                return;
+            }
+
+            var oId = new mongo.ObjectID(req.params.paperId); // Create object id
+            var pId = new mongo.ObjectID(req.body.proofreader);
+
+            // Update in database (must match id PLUS proofreader must exist)
+            db.collection('papers').updateOne({ _id: oId, "proofreaders.user._id": pId }, { $set: { "proofreaders.$.responded": true, "proofreaders.$.url": req.body.url }}, function(err, result) {
+                if (err) {
+                    res.status(500).send('Database Error\n' + err.message);
+                    return;
+                }
+
+                res.status(200).send('Proofreader updated');
+                console.log('Updated: ' + result.upsertedId);
+            });
+        });
+    });
+
+    /**
      * PATCH /papers/:paperId
      * Update the info for a paper
      */
