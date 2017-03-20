@@ -42,6 +42,9 @@
             //CreateTableFromJSON();
             generate_table(response.proofreaders);
 
+            //Set icons of status cells
+            document.getElementById('status_cell_false').innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
+            document.getElementById("status_cell_true").innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
 
         }
     }
@@ -64,10 +67,6 @@
 
 
     function generate_table(array) {
-        //console.log(array);
-        //console.log(array[0]);
-        //console.log(array[0].name);
-        // creates a <table> element and a <tbody> element
         var tbl = document.createElement("table");
         tbl.className = "table table-striped";
 
@@ -83,7 +82,6 @@
             tr.appendChild(th);
         }
 
-
         // creating all cells
         for (var i = 0; i < array.length; i++) {
             // creates a table row
@@ -93,15 +91,37 @@
             var urlCell = document.createElement("td");
             var cellText; //holder
 
-
-            cellText = document.createTextNode(array[i].responded);
-            statusCell.appendChild(cellText);
+            //Setting IDs so that the status symbol will show up
+            if (array[i].responded == false) {statusCell.setAttribute("id", "status_cell_false");}
+            else {statusCell.setAttribute("id", "status_cell_true");}
 
             cellText = document.createTextNode(array[i].name);
             nameCell.appendChild(cellText);
 
-            cellText = document.createTextNode(array[i].url);
-            urlCell.appendChild(cellText);
+            if (array[i].url == null) {
+                var btn = document.createElement('input');
+                btn.type = "button";
+                btn.className = "btn";
+                btn.value = "Upload Document";
+                btn.onclick = (function () {
+                    return function () {
+                        //Todo open file chooser that does upload
+                        console.log("button clicked");
+                    }
+                });
+                urlCell.appendChild(btn);
+            }
+            else {
+                var link = document.createElement("a");
+                link.setAttribute("href", array[i].url)
+                //link.className = "someCSSclass";
+
+                var linkText = document.createTextNode(array[i].url);
+                link.appendChild(linkText);
+
+                // Add the link to the previously created TableCell.
+                urlCell.appendChild(link);
+            }
 
             row.appendChild(statusCell);
             row.appendChild(nameCell);
@@ -115,6 +135,11 @@
         tbl.appendChild(tblBody);
         // appends <table> into <body>
         document.getElementById("showData").appendChild(tbl);
+    }
+
+
+    function replace_icons(array) {
+
     }
 
 
@@ -136,51 +161,24 @@
     <div class="container">
         <h3>Preferences</h3>
         <div id="preferencelist"></div>
-    </div>
-    <h3>Proofreading Needs</h3>
-    <ul>
-        <li>
-            I need help with grammar
-        </li>
-    </ul>
-    <div>
+
+        <h3>Proofreading Needs</h3>
+        <ul>
+            <li>
+                I need help with grammar
+            </li>
+        </ul>
+        <div>
+            <h3>Proofreaders</h3>
+            <div id="showData"></div>
+        </div>
 
 
-        <h3>Proofreaders</h3>
-        <div id="showData"></div>
-
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Status</th>
-                <th>Proofreader</th>
-                <th>Comments & Edits</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-
-                <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>
-                </td>
-                <td>Jane Doe</td>
-                <td><i class="material-icons" style="vertical-align: top; align: left; font-size:18px">file_upload</i>
-                </td>
-            </tr>
-            <tr>
-
-                <td><i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i></td>
-                <td>John Smith</td>
-                <td><a href="">FileName.docx</a></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-
-    <div>
-        <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
-            to
-            Account</a>
+        <div>
+            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go
+                to
+                Account</a>
+        </div>
     </div>
 </div>
 
