@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="js/s3_upload.js"></script>
     <% include ../partials/header.ejs %>
 </head>
 
@@ -107,32 +108,22 @@
             nameCell.appendChild(cellText);
 
             if (array[i].url == null) {
-                var btn = document.createElement('input');
-                btn.type = "button";
-                btn.className = "btn";
-                btn.value = "Upload Document";
-                btn.onclick = (function () {
-                    return function () {
-                        //Todo open file chooser that does upload
-                        console.log("button clicked");
-                    }
-                });
-                urlCell.appendChild(btn);
+                var choose_file = document.createElement("input");
+                choose_file.setAttribute("type", "file");
+                choose_file.setAttribute("id", "uploadPaper");
+                choose_file.onchange = onChange;
+
+                urlCell.appendChild(choose_file);
             }
             else {
                 var link = document.createElement("a");
                 //link.setAttribute("href", array[i].url, "download", array[i].url);
                 link.setAttribute("href", array[i].url);
-
-                //link.className = "someCSSclass";
-
                 var linkText = document.createTextNode(array[i].url);
-                link.appendChild(linkText);
 
-                // Add the link to the previously created TableCell.
+                link.appendChild(linkText);
                 urlCell.appendChild(link);
             }
-
             row.appendChild(statusCell);
             row.appendChild(nameCell);
             row.appendChild(urlCell);
@@ -147,14 +138,52 @@
         document.getElementById("showData").appendChild(tbl);
     }
 
+    function onChange() {
+        // TODO Validate input
 
+        // Get file from picker
+        var file = document.getElementById('uploadPaper').files[0];
+        if (file == null) {
+            return alert('No file selected.');
+        }
+
+        // Check file size
+        if (file.size > 16777216) { // 16 MB
+            return alert('File size must be < 16 MB!');
+        }
+
+        uploadFile(file, function(url) {
+            // Get user ID
+            $.getJSON('/api/user', function(user) {
+                // Make paper JSON
+                var paper = {
+                    proofreader: user._id,
+                    url: url,
+                };
+
+                // Post paper to server
+                $.ajax('/api/papers/paperId/uploadProofread', {
+                    type: 'POST',
+                    data: JSON.stringify(paper),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log('success');
+                        // TODO Success redirect
+                        $(location).attr('href', '/'); // TODO Redirect to view paper
+                    },
+                    failure: function(data) {
+                        alert('Paper creation failed!');
+                    }
+                });
+            });
+        });
+    }
 
     window.onload = function () {
         xhr.send();
     }
 
 </script>
-
 
 <div class="col-md-6">
     <div class="container-fluid">
@@ -172,18 +201,16 @@
          <div id="showData"></div>
 
         <div>
-            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Go to Account</a>
+            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Back to Account</a>
         </div>
     </div>
 </div>
 
 
 <div class="col-md-6">
-    <div class="container">
         <div>
-            <a type="button" class="btn btn-primary" href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
+            <a type="button" class="btn btn-primary btn-lg btn-block" href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
         </div>
-    </div>
 
     <div class="embed-responsive embed-responsive-4by3">
         <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;"></iframe>
