@@ -61,11 +61,12 @@
                         type: 'POST',
                         data: JSON.stringify(paper),
                         contentType: 'application/json',
-                        success: function(data) {
-                            // TODO Check for failure
-                            console.log('success');
-                            // TODO Success redirect
-                            $(location).attr('href', '/'); // TODO Redirect to view paper
+                        dataType: 'json',
+                        success: function(paper) {
+                            console.log('Successfully created paper: ' + paper._id);
+
+                            // Redirect to paper view page
+                            $(location).attr('href', '/view/' + paper._id);
                         },
                         failure: function(data) {
                             alert('Paper creation failed!');
