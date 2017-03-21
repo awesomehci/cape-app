@@ -26,6 +26,13 @@
             uploadFile(file, function(url) {
                 // Get user ID
                 $.getJSON('/api/user', function(user) {
+                    // Get list of proofreaders
+                    var proofList = [];
+                    var proofChecks = $('#proofreaderForm').find('input:checkbox:checked').toArray();
+                    for (var i in proofChecks) {
+                        proofList.push(proofChecks[i].value);
+                    }
+
                     // Get list of checked preferences/needs
                     var prefList = [];
                     var prefChecks = $('#preferenceForm').find('input:checkbox:checked').toArray();
@@ -38,10 +45,6 @@
                     for (var i in needChecks) {
                         needList.push(needChecks[i].value);
                     }
-
-                    // Get list of proofreaders
-                    var proofList = [];
-                    proofList.push(user._id); // TODO Need to get real proofreaders
 
                     // Make paper JSON
                     var paper = {
@@ -73,10 +76,22 @@
         }
 
         $(document).ready(function() {
-            // TODO Get list of proofreaders and create list
+            // Create list of proofreaders
+            $.getJSON('/api/users', function(data) {
+                var users = data.users;
+                for (var i in users) {
+                    // Create checkbox
+                    var checkbox = $('<input>', { type: 'checkbox', value: users[i]._id });
 
-            // Store data: $('#myElId').data('nameYourData', { foo: 'bar' });
-            // Retrieve data: var myData = $('#myElId').data('nameYourData');
+                    // Wrap in label and div
+                    var label = $('<label>').append(checkbox);
+                    label.append(users[i].fullName); // Add name after input tag
+                    var div = $('<div>', { class: 'checkbox' }).append(label);
+
+                    // Append to list
+                    $("#proofreaderForm").append(div);
+                }
+            });
         });
     </script>
 </head>
@@ -108,7 +123,8 @@
             <h3 class="text-center">Proofreaders</h3>
             <div class="col-md-6 col-md-offset-3">
                 <hr />
-                <!-- TODO Proofreaders list -->
+                <!-- Proofreaders list -->
+                <!-- Old drop-down style
                 <div class="center-block">
                     <ul id="preadersSelected">
                         <li>No proofreaders selected.</li>
@@ -122,8 +138,15 @@
                     <ul class="dropdown-menu" aria-labelledby="preadersDropdown" id="preadersList">
                         <li><a href="#">John Smith</a></li>
                         <li><a href="#">Suzanne Doe</a></li>
-                        <!-- TODO To correlate which item is clicked: id="1" onClick="reply_click(this.id)" -->
                     </ul>
+                </div>
+                -->
+                <div class="panel panel-default">
+                    <div class="panel-body proofreader-list-container">
+                        <form id="proofreaderForm">
+                            <!-- Filled in via Javascript -->
+                        </form>
+                    </div>
                 </div>
                 <hr />
             </div>
