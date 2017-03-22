@@ -56,3 +56,16 @@ i {
     overflow: hidden;
     overflow-y: auto;
 }
+
+body > .container {
+    padding-bottom: 20px;
+}
+
+.paper-table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.paper-table > tbody > tr > td > .btn {
+    margin-left: 2px;
+    margin-right: 2px;
+}

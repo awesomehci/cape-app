@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/header.ejs %>
+</head>
+
+<body>
+<script>
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    function generate_PaperTable(paperList) {
+        var paperTable = $('#paperTable');
+
+        for (var i in paperList) {
+            var paper = paperList[i];
+            var paperViewURL = '/view/' + paper._id;
+            var paperUpdateURL = '/update/' + paper._id;
+
+            var row = $('<tr>');
+
+            // Paper Title
+            row.append(
+                $('<td>').append(
+                    //<a href="/view/:paperId">Modeling Defect Density in Open Source Collaborative Projects</a>
+                    $('<a>', { href: paperViewURL }).text(
+                        paper.title
+                    )
+                )
+            );
+
+            // Date Uploaded
+            var date = new Date(paper.created);
+            var dateString = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+
+            row.append(
+                //March 22, 2017
+                $('<td>').text(
+                    dateString
+                )
+            );
+
+            // Completed Proofreads
+            var completedProofreaders = paper.proofreaders.filter(function(proofreader) {
+                return proofreader.responded;
+            });
+            var completedCount = completedProofreaders.length;
+            var proofreaderCount = paper.proofreaders.length;
+
+            row.append(
+                $('<td>').text(
+                    //0 / 3
+                    completedCount + ' / ' + proofreaderCount
+                )
+            );
+
+            // Actions
+            row.append(
+                $('<td>', { class: 'text-center' }).append(
+                    //<a href="/view/:paperId" class="btn btn-primary">View</a>
+                    $('<a>', { href: paperViewURL, class: 'btn btn-primary' }).text(
+                        'View'
+                    )
+                ).append(
+                    //<a href="/update/:paperId" class="btn btn-default">Update</a>
+                    $('<a>', { href: paperUpdateURL, class: 'btn btn-default' }).text(
+                        'Update'
+                    )
+                ).append(
+                    //<button type="button" class="btn btn-danger" value=":paperId" onclick="onDelete(this.value)">Delete</button>
+                    $('<button>', { type: 'button', class: 'btn btn-danger', value: paper._id, onclick: 'onDelete(this.value)'}).text(
+                        'Delete'
+                    )
+                )
+            );
+
+            // Add to table
+            paperTable.append(row);
+        }
+    }
+
+    function generate_ProofreadTable(proofreadList) {
+        var tbl = document.createElement("table");
+        tbl.className = "table table-striped";
+
+        var tblBody = document.createElement("tbody");
+
+        //Create header
+        //Actions are view
+        //Completed Proofread is just yes or no
+        var col = ["Paper Title", "Date Uploaded", "Completed Proofreads", "Actions"];
+        var tr = tbl.insertRow(-1);
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+    }
+
+    function onDelete(paperId) {
+
+    }
+
+    $(document).ready(function() {
+        // Get logged-in user
+        $.getJSON('/api/user', function(user) {
+            // Fill in user text
+            $('#user').text(user.fullName);
+            $('#email').text(user.email);
+
+            // Get list of papers
+            var userURL = '/api/users/' + user._id;
+            $.getJSON(userURL + '/papers', function(data) {
+                // Create paper list
+                generate_PaperTable(data.papers);
+
+                // Get list of proofreads
+                $.getJSON(userURL + '/proofreads', function(data) {
+                    // Create proofread list
+                    generate_ProofreadTable(data.proofreads);
+                });
+            });
+        });
+    });
+</script>
+
+<div class="container">
+    <!-- Title -->
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Account</h1>
+            <hr/>
+        </div>
+    </div>
+
+    <!-- Account Info -->
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <p><strong>Logged in as:</strong> <span id="user"></span> (<span id="email"></span>)</p>
+            <hr/>
+        </div>
+    </div>
+
+    <!-- Your Papers -->
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h3 class="text-center">Your Papers</h3>
+            <hr/>
+            <div class="text-center">
+                <a href="/create" type="button" class="btn btn-primary btn-lg">Add Paper</a>
+                <!-- TODO Move to different place? -->
+            </div>
+            <br />
+            <div class="panel panel-default">
+                <div class="table-responsive">
+                    <!-- Paper list -->
+                    <table id="paperTable" class="table table-striped table-bordered paper-table">
+                        <thead>
+                            <tr>
+                                <th class="col-md-6">Paper Title</th>
+                                <th class="col-md-2">Date Uploaded</th>
+                                <th class="col-md-1">Completed Proofreads</th>
+                                <th class="col-md-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <!-- Paper rows go here -->
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Your Obligations -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Your Obligations</h3>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

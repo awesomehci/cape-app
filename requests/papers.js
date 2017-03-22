@@ -102,7 +102,11 @@ module.exports = function(express, db) {
                 }
 
                 // Make new paper object from POST body
+                var currentTime = new Date();
+
                 var newPaper = {
+                    valid: true,
+                    created: currentTime,
                     title: req.body.title,
                     owner: doc,
                     url: req.body.url,
