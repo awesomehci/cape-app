@@ -66,8 +66,8 @@
                         'Update'
                     )
                 ).append(
-                    //<button type="button" class="btn btn-danger" value=":paperId" onclick="onDelete(this.value)">Delete</button>
-                    $('<button>', { type: 'button', class: 'btn btn-danger', value: paper._id, onclick: 'onDelete(this.value)'}).text(
+                    //<button type="button" class="btn btn-danger" data-paperid=":paperId" data-toggle="modal" data-target="#modalConfirm">Delete</button>
+                    $('<button>', { type: 'button', class: 'btn btn-danger', 'data-paperid': paper._id, 'data-toggle': 'modal', 'data-target': '#modalConfirm'}).text(
                         'Delete'
                     )
                 )
@@ -135,10 +135,24 @@
         }
     }
 
-    function onDelete(paperId) {
-        console.log('onDelete(' + paperId + ')');
+    function deletePaper(paperId) {
+        console.log('deletePaper(' + paperId + ')');
 
+        $.ajax('/api/papers/' + paperId, {
+            type: 'DELETE',
+            success: function(response) {
+                console.log('Deleted paper: ' + paperId);
 
+                // Refresh the page
+                location.reload();
+            },
+            failure: function(response) {
+                console.log('Error deleting paper: ' + paperId);
+
+                // Refresh the page
+                location.reload();
+            }
+        });
     }
 
     $(document).ready(function() {
@@ -160,6 +174,17 @@
                     generate_ProofreadTable(data.proofreads, user._id);
                 });
             });
+        });
+
+        // Set up modal dialog
+        $('#modalConfirm').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var paperId = button.data('paperid');
+
+            // Hook up deletion function
+            var deleteBtn = $('#modalDeleteBtn');
+            deleteBtn.attr('value', paperId);
+            deleteBtn.attr('onclick', 'deletePaper(this.value)');
         });
     });
 </script>
@@ -244,6 +269,6 @@
         </div>
     </div>
 </div>
-
+<% include ../partials/modal_confirm.ejs %>
 </body>
 </html>
