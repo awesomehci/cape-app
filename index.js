@@ -1,7 +1,15 @@
+/**
+ * Requires
+ */
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var expressValidator = require('express-validator');
 var stormpath = require('express-stormpath');
+
+/**
+ * Check for production/development flag
+ */
 
 var production = process.env.NODE_ENV == "production";
 console.log('Mode: ' + (production ? 'PROD' : 'DEV'));
@@ -11,6 +19,10 @@ if (!production) {
     console.log('DEV: Load .env file');
     require('dotenv').config()
 }
+
+/**
+ * Configure express
+ */
 
 // Set up app
 console.log('Configuring express application...');
@@ -35,6 +47,10 @@ if (production) {
     });
 }
 
+/**
+ * mLab MongoDB initialization
+ */
+
 // Set up DB connection
 console.log('Connecting to mLab database server...');
 var MongoClient = require('mongodb').MongoClient;
@@ -46,9 +62,13 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     }
     console.log('Connected to database server');
 
+    /**
+     * Stormpath user management initialization
+     */
+
     // Initialize Stormpath (for user account authentication)
     console.log('Initializing Stormpath middleware...');
-    var postRegistrationHandler = require('./requests/users').postRegistrationHandler(db)
+    var postRegistrationHandler = require('./requests/users').postRegistrationHandler(db);
 
     app.use(stormpath.init(app, {
         website: true,
@@ -66,6 +86,10 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         },
         postRegistrationHandler: postRegistrationHandler
     }));
+
+    /**
+     * AWS S3 initialization
+     */
 
     // Set up AWS S3 storage
     console.log('Connecting to AWS services...');
@@ -88,7 +112,7 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
             if (err) {
                 console.log('Error getting signed URL');
                 console.log(err);
-                res.end()
+                res.end();
                 return;
             }
 
@@ -102,7 +126,10 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         });
     });
 
-    // Requests
+    /**
+     * API requests
+     */
+
     console.log('Loading API request routes...');
     var papers = require('./requests/papers')(express, db);
     var users = require('./requests/users').router(express, db, stormpath);
@@ -110,16 +137,28 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     app.use('/api', papers);
     app.use('/api', users);
 
-    // Views
+    /**
+     * Views
+     */
+
     // views is directory for all template files
     console.log('Loading views...');
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
 
+    /**
+     * Routes
+     */
+
     // Index
-    app.get('/view/:paper_id', function(req, res) {
-        //res.render('pages/index');
-        res.render('pages/view', {paper_id: req.params.paper_id}); // TODO redirect to test view page
+    app.get('/',  stormpath.authenticationRequired, function(req, res) {
+        res.render('pages/account');
+    });
+
+    // View paper
+    app.get('/view/:paper_id', stormpath.authenticationRequired, function(req, res) {
+        // Pass paper_id to ejs file
+        res.render('pages/view', {paper_id: req.params.paper_id});
     });
 
     // Create paper
@@ -127,7 +166,16 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
         res.render('pages/create');
     });
 
-    // Start app
+    // Update paper
+    app.get('/update/:paper_id', stormpath.authenticationRequired, function(req, res) {
+        // Pass paper_id to ejs file (enables create to function as edit)
+        res.render('pages/create', {paper_id: req.params.paper_id});
+    });
+
+    /**
+     * Start app
+     */
+
     console.log('Starting express app...');
     console.log('Waiting for Stormpath...');
     app.on('stormpath.ready', function() {
