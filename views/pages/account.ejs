@@ -55,7 +55,7 @@
 
             // Actions
             row.append(
-                $('<td>', { class: 'text-center' }).append(
+                $('<td>', { class: '' }).append(
                     //<a href="/view/:paperId" class="btn btn-primary">View</a>
                     $('<a>', { href: paperViewURL, class: 'btn btn-primary' }).text(
                         'View'
@@ -78,26 +78,66 @@
         }
     }
 
-    function generate_ProofreadTable(proofreadList) {
-        var tbl = document.createElement("table");
-        tbl.className = "table table-striped";
+    function generate_ProofreadTable(paperList, userId) {
+        var proofreadTable = $('#proofreadTable');
 
-        var tblBody = document.createElement("tbody");
+        for (var i in paperList) {
+            var paper = paperList[i];
+            var paperViewURL = '/view/' + paper._id;
 
-        //Create header
-        //Actions are view
-        //Completed Proofread is just yes or no
-        var col = ["Paper Title", "Date Uploaded", "Completed Proofreads", "Actions"];
-        var tr = tbl.insertRow(-1);
+            var row = $('<tr>');
 
-        for (var i = 0; i < col.length; i++) {
-            var th = document.createElement("th");      // TABLE HEADER.
-            th.innerHTML = col[i];
-            tr.appendChild(th);
+            // Paper Title
+            row.append(
+                $('<td>').append(
+                    //<a href="/view/:paperId">Modeling Defect Density in Open Source Collaborative Projects</a>
+                    $('<a>', {href: paperViewURL}).text(
+                        paper.title
+                    )
+                )
+            );
+
+            // Date Uploaded
+            var date = new Date(paper.created);
+            var dateString = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+
+            row.append(
+                //March 22, 2017
+                $('<td>').text(
+                    dateString
+                )
+            );
+
+            // Completed Proofreads
+            var proofreaderMatch = paper.proofreaders.find(function (proofreader) {
+                return proofreader.user._id == userId;
+            });
+
+            row.append(
+                $('<td>').text(
+                    //Yes / No
+                    proofreaderMatch.responded ? 'Yes' : 'No'
+                )
+            );
+
+            // Actions
+            row.append(
+                $('<td>', {class: ''}).append(
+                    //<a href="/view/:paperId" class="btn btn-primary">View</a>
+                    $('<a>', {href: paperViewURL, class: 'btn btn-primary'}).text(
+                        'View'
+                    )
+                )
+            );
+
+            // Add to table
+            proofreadTable.append(row);
         }
     }
 
     function onDelete(paperId) {
+        console.log('onDelete(' + paperId + ')');
+
 
     }
 
@@ -117,7 +157,7 @@
                 // Get list of proofreads
                 $.getJSON(userURL + '/proofreads', function(data) {
                     // Create proofread list
-                    generate_ProofreadTable(data.proofreads);
+                    generate_ProofreadTable(data.proofreads, user._id);
                 });
             });
         });
@@ -143,24 +183,28 @@
 
     <!-- Your Papers -->
     <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-            <h3 class="text-center">Your Papers</h3>
+        <h3 class="text-center">Your Papers</h3>
+        <div class="col-md-6 col-md-offset-3">
             <hr/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
             <div class="text-center">
                 <a href="/create" type="button" class="btn btn-primary btn-lg">Add Paper</a>
-                <!-- TODO Move to different place? -->
             </div>
             <br />
             <div class="panel panel-default">
                 <div class="table-responsive">
                     <!-- Paper list -->
-                    <table id="paperTable" class="table table-striped table-bordered paper-table">
+                    <table id="paperTable" class="table table-striped paper-table">
                         <thead>
                             <tr>
                                 <th class="col-md-6">Paper Title</th>
                                 <th class="col-md-2">Date Uploaded</th>
                                 <th class="col-md-1">Completed Proofreads</th>
-                                <th class="col-md-3 text-center">Actions</th>
+                                <th class="col-md-3">Actions</th>
                             </tr>
                         </thead>
                         <!-- Paper rows go here -->
@@ -168,12 +212,35 @@
                 </div>
             </div>
         </div>
+        <hr/>
     </div>
 
     <!-- Your Obligations -->
     <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h3 class="text-center">Your Obligations</h3>
+            <hr/>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-12">
-            <h3>Your Obligations</h3>
+            <div class="panel panel-default">
+                <div class="table-responsive">
+                    <!-- Proofread list -->
+                    <table id="proofreadTable" class="table table-striped paper-table">
+                        <thead>
+                        <tr>
+                            <th class="col-md-6">Paper Title</th>
+                            <th class="col-md-2">Date Uploaded</th>
+                            <th class="col-md-1">Completed Proofread</th>
+                            <th class="col-md-3">Actions</th>
+                        </tr>
+                        </thead>
+                        <!-- Proofread rows go here -->
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
