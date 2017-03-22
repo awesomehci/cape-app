@@ -23,9 +23,9 @@
                 return alert('File size must be < 16 MB!');
             }
 
-            uploadFile(file, function(url) {
+            uploadFile(file, function (url) {
                 // Get user ID
-                $.getJSON('/api/user', function(user) {
+                $.getJSON('/api/user', function (user) {
                     // Get list of proofreaders
                     var proofList = [];
                     var proofChecks = $('#proofreaderForm').find('input:checkbox:checked').toArray();
@@ -62,13 +62,13 @@
                         data: JSON.stringify(paper),
                         contentType: 'application/json',
                         dataType: 'json',
-                        success: function(paper) {
+                        success: function (paper) {
                             console.log('Successfully created paper: ' + paper._id);
 
                             // Redirect to paper view page
                             $(location).attr('href', '/view/' + paper._id);
                         },
-                        failure: function(data) {
+                        failure: function (data) {
                             alert('Paper creation failed!');
                         }
                     });
@@ -76,18 +76,18 @@
             });
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Create list of proofreaders
-            $.getJSON('/api/users', function(data) {
+            $.getJSON('/api/users', function (data) {
                 var users = data.users;
                 for (var i in users) {
                     // Create checkbox
-                    var checkbox = $('<input>', { type: 'checkbox', value: users[i]._id });
+                    var checkbox = $('<input>', {type: 'checkbox', value: users[i]._id});
 
                     // Wrap in label and div
                     var label = $('<label>').append(checkbox);
                     label.append(users[i].fullName); // Add name after input tag
-                    var div = $('<div>', { class: 'checkbox' }).append(label);
+                    var div = $('<div>', {class: 'checkbox'}).append(label);
 
                     // Append to list
                     $("#proofreaderForm").append(div);
@@ -98,123 +98,126 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="row">
-            <h1 class="text-center">Create Paper</h1>
-            <hr />
-        </div>
-        <div class="row">
-            <div class="col-md-6 col-md-offset-3">
-                <form>
-                    <div class="form-group">
-                        <label for="paperTitle">Paper Title</label>
-                        <input type="text" class="form-control" id="paperTitle" placeholder="My Paper">
-                    </div>
-                    <div class="form-group">
-                        <label for="uploadPaper">Upload Paper</label>
-                        <input type="file" id="uploadPaper">
-                        <p class="help-block">Accepted files: .doc, .docx, .pdf; File size: &lt;16 MB</p>
-                    </div>
-                </form>
-                <!-- TODO Insert editable title field -->
-                <hr />
-            </div>
-        </div>
-        <div class="row">
-            <h3 class="text-center">Proofreaders</h3>
-            <div class="col-md-6 col-md-offset-3">
-                <hr />
-                <!-- Proofreaders list -->
-                <!-- Old drop-down style
-                <div class="center-block">
-                    <ul id="preadersSelected">
-                        <li>No proofreaders selected.</li>
-                    </ul>
+<div class="container">
+    <div class="row">
+        <h1 class="text-center">Create Paper</h1>
+        <hr/>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form>
+                <div class="form-group">
+                    <label for="paperTitle">Paper Title</label>
+                    <input type="text" class="form-control" id="paperTitle" placeholder="My Paper">
                 </div>
-                <div class="dropdown center-block">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="preadersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Select proofreaders
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="preadersDropdown" id="preadersList">
-                        <li><a href="#">John Smith</a></li>
-                        <li><a href="#">Suzanne Doe</a></li>
-                    </ul>
+                <div class="form-group">
+                    <label for="uploadPaper">Upload Paper</label>
+                    <input type="file" id="uploadPaper">
+                    <p class="help-block">Accepted files: .doc, .docx, .pdf; File size: &lt;16 MB</p>
                 </div>
-                -->
-                <div class="panel panel-default">
-                    <div class="panel-body proofreader-list-container">
-                        <form id="proofreaderForm">
-                            <!-- Filled in via Javascript -->
-                        </form>
-                    </div>
-                </div>
-                <hr />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-5 col-md-offset-1">
-                <h3 class="text-center">Preferences</h3>
-                <hr />
-                <form id="preferenceForm">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="I am ok with direct edits">
-                            I am ok with direct edits
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="I want proofreaders to use Track Changes">
-                            I want proofreaders to use Track Changes
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="Proofreaders should always comment changes">
-                            Proofreaders should always comment changes
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="I only want comments">
-                            I only want comments
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="col-md-5">
-                <h3 class="text-center">Proofreading Needs</h3>
-                <hr />
-                <form id="needForm">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="I need help with grammar">
-                            I need help with grammar
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="I need help with content">
-                            I need help with content
-                        </label>
-                    </div>
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="I need help soon">
-                            I need help soon
-                        </label>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <hr />
-                <button type="button" class="btn btn-primary btn-lg" id="submitBtn" onclick="onFormSubmit()">Submit</button>
-                <button type="button" class="btn btn-default btn-lg" id="cancelBtn">Cancel</button>
-            </div>
+            </form>
+            <!-- TODO Insert editable title field -->
+            <hr/>
         </div>
     </div>
+    <div class="row">
+        <h3 class="text-center">Proofreaders</h3>
+        <div class="col-md-6 col-md-offset-3">
+            <hr/>
+            <!-- Proofreaders list -->
+            <!-- Old drop-down style
+            <div class="center-block">
+                <ul id="preadersSelected">
+                    <li>No proofreaders selected.</li>
+                </ul>
+            </div>
+            <div class="dropdown center-block">
+                <button class="btn btn-default dropdown-toggle" type="button" id="preadersDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Select proofreaders
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="preadersDropdown" id="preadersList">
+                    <li><a href="#">John Smith</a></li>
+                    <li><a href="#">Suzanne Doe</a></li>
+                </ul>
+            </div>
+            -->
+            <div class="panel panel-default">
+                <div class="panel-body proofreader-list-container">
+                    <form id="proofreaderForm">
+                        <!-- Filled in via Javascript -->
+                    </form>
+                </div>
+            </div>
+            <hr/>
+        </div>
+    </div>
+    <div class="row">
+        <h3 class="text-center">Preferences</h3>
+        <div class="col-md-6 col-md-offset-3">
+            <hr/>
+            <form id="preferenceForm">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="I am ok with direct edits">
+                        I am ok with direct edits
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="I want proofreaders to use Track Changes">
+                        I want proofreaders to use Track Changes
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="Proofreaders should always comment changes">
+                        Proofreaders should always comment changes
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="I only want comments">
+                        I only want comments
+                    </label>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <h3 class="text-center">Proofreading Needs</h3>
+        <div class="col-md-6 col-md-offset-3">
+            <hr/>
+            <form id="needForm">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="I need help with grammar">
+                        I need help with grammar
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="I need help with content">
+                        I need help with content
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="I need help soon">
+                        I need help soon
+                    </label>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-md-12">
+        <hr/>
+        <button type="button" class="btn btn-primary btn-lg" id="submitBtn" onclick="onFormSubmit()">Submit</button>
+        <button type="button" class="btn btn-default btn-lg" id="cancelBtn">Cancel</button>
+    </div>
+</div>
+</div>
 </body>
 </html>

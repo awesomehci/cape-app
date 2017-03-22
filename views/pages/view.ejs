@@ -40,7 +40,7 @@
             needs = response.needs;
             //console.log(preferences);
 
-            document.getElementById('paperTitle').innerHTML = "Title: " + paperTitle;
+            document.getElementById('paperTitle').innerHTML = "Paper Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
             document.getElementById('paperIframe').src = paperURL;
             document.getElementById('download_button').href = downloadURL;
@@ -51,10 +51,10 @@
             generate_table(response.proofreaders);
 
             //Set icons of status cells
-            if(document.body.contains(document.getElementById('status_cell_false'))){
+            if (document.body.contains(document.getElementById('status_cell_false'))) {
                 document.getElementById('status_cell_false').innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
             }
-            if(document.body.contains(document.getElementById('status_cell_true'))){
+            if (document.body.contains(document.getElementById('status_cell_true'))) {
                 document.getElementById("status_cell_true").innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
             }
         }
@@ -103,8 +103,12 @@
             var cellText; //holder
 
             //Setting IDs so that the status symbol will show up
-            if (array[i].responded == false) {statusCell.setAttribute("id", "status_cell_false");}
-            else {statusCell.setAttribute("id", "status_cell_true");}
+            if (array[i].responded == false) {
+                statusCell.setAttribute("id", "status_cell_false");
+            }
+            else {
+                statusCell.setAttribute("id", "status_cell_true");
+            }
 
             cellText = document.createTextNode(array[i].user.fullName);
             nameCell.appendChild(cellText);
@@ -115,14 +119,13 @@
 
             if (array[i].url == null) {
                 var proofreader = array[i].user._id;
-                $.getJSON('/api/user', function(user) {
+                $.getJSON('/api/user', function (user) {
                     // Make paper JSON
                     //if(user._id == )
                     console.log("User " + proofreader);
                     console.log("User " + user._id);
 
-                    if(user._id == proofreader)
-                    {
+                    if (user._id == proofreader) {
                         var choose_file = document.createElement("input");
                         choose_file.setAttribute("type", "file");
                         choose_file.setAttribute("id", "uploadPaper");
@@ -131,7 +134,7 @@
                         urlCell.appendChild(choose_file);
                     }
 
-                    else{
+                    else {
                         cellText = document.createTextNode("");
                         console.log("user is not logged in");
                         urlCell.appendChild(cellText);
@@ -176,9 +179,9 @@
             return alert('File size must be < 16 MB!');
         }
 
-        uploadFile(file, function(url) {
+        uploadFile(file, function (url) {
             // Get user ID
-            $.getJSON('/api/user', function(user) {
+            $.getJSON('/api/user', function (user) {
                 // Make paper JSON
                 var paper = {
                     proofreader: user._id,
@@ -186,17 +189,17 @@
                 };
 
                 // Post paper to server
-                $.ajax('/api/papers/'+ paper_id +'/uploadProofread', {
+                $.ajax('/api/papers/' + paper_id + '/uploadProofread', {
                     type: 'POST',
                     data: JSON.stringify(paper),
                     contentType: 'application/json',
-                    success: function(data) {
+                    success: function (data) {
                         console.log('success');
                         // TODO Success redirect
                         //$(location).attr('href', '/view/'+paper_id); // TODO Redirect to view paper
                         window.location.reload();
                     },
-                    failure: function(data) {
+                    failure: function (data) {
                         alert('Paper creation failed!');
                     }
                 });
@@ -212,30 +215,54 @@
 
 <div class="col-md-6">
     <div class="container-fluid">
-        <h1>View Paper Status</h1>
-        <h2><span id="paperTitle"></span></h2>
-        <h3><span id="paperOwner"></span></h3>
-
-        <h3>Preferences</h3>
-        <div id="preferencelist"></div>
-
-        <h3>Proofreading Needs</h3>
-        <div id="needlist"></div>
-
-         <h3>Proofreaders</h3>
-         <div id="showData"></div>
-
-        <div>
-            <a type="button" class="btn btn-primary" href="/">Back to Account</a>
+        <div class="row">
+            <h1 class="text-center">View Paper Status</h1>
+            <hr>
         </div>
+        <div class="col-md-6 col-md-offset-3">
+            <div class="row">
+                <h3 class="text-center"><span id="paperTitle"></span></h3>
+                <p class="text-center" style="font-weight: bold"><span id="paperOwner"></span></p>
+                <hr>
+            </div>
+
+            <div class="row">
+                <h3 class="text-center">Preferences</h3>
+                <hr>
+                <div id="preferencelist"></div>
+                <hr>
+            </div>
+
+            <div class="row">
+                <h3 class="text-center">Proofreading Needs</h3>
+                <hr>
+                <div id="needlist"></div>
+                <hr>
+            </div>
+
+            <div class="row">
+                <h3 class="text-center">Proofreaders</h3>
+                <hr>
+                <div id="showData"></div>
+
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <hr>
+            <a type="button" class="btn btn-primary btn-lg" href="/">Back to Account</a>
+        </div>
+
     </div>
 </div>
 
 
 <div class="col-md-6">
-        <div>
-            <a id = "download_button" type="button" class="btn btn-primary btn-lg btn-block" href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
-        </div>
+    <div>
+        <a id="download_button" type="button" class="btn btn-primary btn-lg btn-block"
+           href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
+    </div>
 
     <div class="embed-responsive embed-responsive-4by3">
         <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;"></iframe>
