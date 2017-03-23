@@ -123,17 +123,43 @@ module.exports = function(express, db) {
                         newPaper.proofreaders.push({ user: docs[i], responded: false, url: null });
                     }
 
-                    // Insert in collection
-                    db.collection('papers').insertOne(newPaper, function(err, result) {
-                        if (err || !result.insertedCount) {
-                            res.status(500).send('Database Error\n' + err.message);
+                    // Check for update vs. create
+                    if (req.body.paperId != null) {
+                        // Update existing
+
+                        // Check for valid owner Id
+                        if (!mongo.ObjectID.isValid(req.body.paperId)) {
+                            res.status(400).send('Invalid paperId');
                             return;
                         }
 
-                        res.status(201).json(result.ops[0]);
-                        console.log(result.ops[0]);
-                        console.log('Created paper: ' + result.insertedId);
-                    });
+                        var updateId = new mongo.ObjectId(req.body.paperId);
+
+                        db.collection('papers').updateOne({ _id: updateId }, newPaper, function (err, result) {
+                            if (err) {
+                                res.status(500).send('Database Error\n' + err.message);
+                                return;
+                            }
+
+                            newPaper._id = updateId;
+
+                            res.status(201).json(newPaper);
+                            console.log(newPaper);
+                            console.log('Updated paper: ' + updateId);
+                        });
+                    } else {
+                        // Insert in collection
+                        db.collection('papers').insertOne(newPaper, function (err, result) {
+                            if (err || !result.insertedCount) {
+                                res.status(500).send('Database Error\n' + err.message);
+                                return;
+                            }
+
+                            res.status(201).json(result.ops[0]);
+                            console.log(result.ops[0]);
+                            console.log('Created paper: ' + result.insertedId);
+                        });
+                    }
                 });
             });
         });

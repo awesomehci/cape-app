@@ -2,26 +2,33 @@
 <html>
 <head>
     <% include ../partials/header.ejs %>
-    <script src="js/s3_upload.js"></script>
+    <script src="/js/s3_upload.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
-        function onFormSubmit() {
-            // TODO Validate input
+        var updatePaperId = <%- (typeof paper_id !== 'undefined') ? '"' + paper_id + '"' : 'null' %>;
 
-            // Going to attempt creation; disable buttons
-            $('#submitBtn').prop('disabled', true);
-            $('#cancelBtn').prop('disabled', true);
+        function onFormSubmit() {
+            var paperTitle = $('#paperTitle').val();
+
+            // Validate paper title
+            if (paperTitle.length <= 0) {
+                return alert('Please enter a paper title!');
+            }
 
             // Get file from picker
             var file = document.getElementById('uploadPaper').files[0];
             if (file == null) {
-                return alert('No file selected.');
+                return alert('Please select a paper to upload.');
             }
 
             // Check file size
             if (file.size > 16777216) { // 16 MB
                 return alert('File size must be < 16 MB!');
             }
+
+            // Going to attempt creation; disable buttons
+            $('#submitBtn').prop('disabled', true);
+            $('#cancelBtn').prop('disabled', true);
 
             uploadFile(file, function (url) {
                 // Get user ID
@@ -48,13 +55,18 @@
 
                     // Make paper JSON
                     var paper = {
-                        title: $('#paperTitle').val(),
+                        title: paperTitle,
                         owner: user._id,
                         url: url,
                         preferences: prefList,
                         needs: needList,
                         proofreaders: proofList
                     };
+
+                    // Add paperId if updating
+                    if (updatePaperId != null) {
+                        paper.paperId = updatePaperId;
+                    }
 
                     // Post paper to server
                     $.ajax('/api/papers', {
@@ -70,9 +82,60 @@
                         },
                         failure: function (data) {
                             alert('Paper creation failed!');
+
+                            // Re-enable buttons
+                            $('#submitBtn').prop('disabled', false);
+                            $('#cancelBtn').prop('disabled', false);
                         }
                     });
                 });
+            });
+        }
+
+        function doUpdateModeThings(paperId) {
+            // Get paper
+            $.getJSON('/api/papers/' + paperId, function(paper) {
+                // Change title
+                $('#pageTitle').text('Update Paper');
+
+                // Prepopulate fields
+                $('#paperTitle').val(paper.title);
+
+                // Get list of proofreader ids
+                var proofreaderIds = [];
+                for (var i in paper.proofreaders) {
+                    proofreaderIds.push(paper.proofreaders[i].user._id);
+                }
+
+                // Check proofreaders
+                var proofChecks = $('#proofreaderForm').find('input:checkbox').toArray();
+                for (var i in proofChecks) {
+                    var proofCheck = proofChecks[i];
+                    if (proofreaderIds.indexOf(proofCheck.value) >= 0) {
+                        $(proofCheck).prop('checked', true);
+                    }
+                };
+
+                // Check preferences
+                var prefChecks = $('#preferenceForm').find('input:checkbox').toArray();
+                for (var i in prefChecks) {
+                    var prefCheck = prefChecks[i];
+                    if (paper.preferences.indexOf(prefCheck.value) >= 0) {
+                        $(prefCheck).prop('checked', true);
+                    }
+                };
+
+                // Check needs
+                var needChecks = $('#needForm').find('input:checkbox').toArray();
+                for (var i in needChecks) {
+                    var needCheck = needChecks[i];
+                    if (paper.needs.indexOf(needCheck.value) >= 0) {
+                        $(needCheck).prop('checked', true);
+                    }
+                };
+            }).fail(function(data) {
+                // No paper found with this id! Escape back to dashboard
+                $(location).attr('href', '/');
             });
         }
 
@@ -90,7 +153,12 @@
                     var div = $('<div>', {class: 'checkbox'}).append(label);
 
                     // Append to list
-                    $("#proofreaderForm").append(div);
+                    $('#proofreaderForm').append(div);
+                }
+
+                // Change things if in update mode
+                if (updatePaperId != null) {
+                    doUpdateModeThings(updatePaperId);
                 }
             });
         });
@@ -100,8 +168,10 @@
 <body>
 <div class="container">
     <div class="row">
-        <h1 class="text-center">Create Paper</h1>
-        <hr/>
+        <div class="col-md-12">
+            <h1 id="pageTitle" class="text-center">Create Paper</h1>
+            <hr/>
+        </div>
     </div>
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
@@ -112,7 +182,7 @@
                 </div>
                 <div class="form-group">
                     <label for="uploadPaper">Upload Paper</label>
-                    <input type="file" id="uploadPaper">
+                    <input type="file" id="uploadPaper" accept=".doc,.docx,.pdf,.rtf,.txt">
                     <p class="help-block">Accepted files: .doc, .docx, .pdf; File size: &lt;16 MB</p>
                 </div>
             </form>
@@ -182,6 +252,7 @@
                     </label>
                 </div>
             </form>
+            <hr/>
         </div>
     </div>
     <div class="row">
@@ -210,14 +281,13 @@
             </form>
         </div>
     </div>
-
-<div class="row">
-    <div class="col-md-12">
-        <hr/>
-        <button type="button" class="btn btn-primary btn-lg" id="submitBtn" onclick="onFormSubmit()">Submit</button>
-        <button type="button" class="btn btn-default btn-lg" id="cancelBtn">Cancel</button>
+    <div class="row">
+        <div class="col-md-12">
+            <hr/>
+            <button type="button" class="btn btn-primary btn-lg" id="submitBtn" onclick="onFormSubmit()">Submit</button>
+            <a href="/" class="btn btn-default btn-lg" id="cancelBtn">Cancel</a>
+        </div>
     </div>
-</div>
 </div>
 </body>
 </html>
