@@ -49,13 +49,21 @@
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
             document.getElementById('needlist').appendChild(makeUL(needs));
             generate_table(response.proofreaders);
+            console.log(response.proofreaders);
 
             //Set icons of status cells
-            if (document.body.contains(document.getElementById('status_cell_false'))) {
-                document.getElementById('status_cell_false').innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
-            }
-            if (document.body.contains(document.getElementById('status_cell_true'))) {
-                document.getElementById("status_cell_true").innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
+            var all = document.getElementsByTagName("*");
+
+            for (var i=0, max=all.length; i < max; i++) {
+                if(all[i].id == 'status_cell_false')
+                {
+                    all[i].innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box_outline_blank</i>');
+                }
+                else if (all[i].id == 'status_cell_true')
+                {
+                    all[i].innerHTML = ('<i class="material-icons" style="vertical-align: top; font-size:18px">check_box</i>');
+                }
+
             }
         }
     }
