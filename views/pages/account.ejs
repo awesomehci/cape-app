@@ -201,7 +201,12 @@
     <!-- Account Info -->
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <p><strong>Logged in as:</strong> <span id="user"></span> (<span id="email"></span>)</p>
+            <div class="text-center">
+                <p><strong>Logged in as:</strong> <span id="user"></span> (<span id="email"></span>)</p>
+                <form action="/logout" method="post">
+                    <input class="btn btn-primary btn-lg" type="submit" value="Logout">
+                </form>
+            </div>
             <hr/>
         </div>
     </div>
