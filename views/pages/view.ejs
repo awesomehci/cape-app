@@ -14,7 +14,7 @@
 
     var paperTitle = "";
     var paperOwner = "";
-    var paperURL = "";
+    //var paperURL = "";
     var preferences;
     var needs;
 
@@ -34,16 +34,16 @@
 
             paperTitle = response.title;
             paperOwner = response.owner.fullName;
-            paperURL = "https://docs.google.com/gview?url=" + response.url + "&embedded=true";
-            downloadURL = response.url;
+            //paperURL = "https://docs.google.com/gview?url=" + response.url + "&embedded=true";
+            //downloadURL = response.url;
             preferences = response.preferences;
             needs = response.needs;
             //console.log(preferences);
 
             document.getElementById('paperTitle').innerHTML = "Paper Title: " + paperTitle;
             document.getElementById('paperOwner').innerHTML = "Owner: " + paperOwner;
-            document.getElementById('paperIframe').src = paperURL;
-            document.getElementById('download_button').href = downloadURL;
+            //document.getElementById('paperIframe').src = paperURL;
+            //document.getElementById('download_button').href = downloadURL;
             //console.log(paperURL);
 
             document.getElementById('preferencelist').appendChild(makeUL(preferences));
@@ -265,11 +265,11 @@
 <div class="col-md-6">
     <div>
         <a id="download_button" type="button" class="btn btn-primary btn-lg btn-block"
-           href="https://github.com/heroku/node-js-getting-started">Download Paper</a>
+           href="<%= paper_url %>" download>Download Paper</a>
     </div>
 
     <div class="embed-responsive embed-responsive-4by3">
-        <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;"></iframe>
+        <iframe id="paperIframe" class="embed-responsive-item" style="width: 100%; height:100%;" src="https://docs.google.com/gview?url=<%= paper_url %>&embedded=true"></iframe>
     </div>
 </div>
 

@@ -53,7 +53,8 @@ if (production) {
 
 // Set up DB connection
 console.log('Connecting to mLab database server...');
-var MongoClient = require('mongodb').MongoClient;
+var mongo = require('mongodb');
+var MongoClient = mongo.MongoClient;
 MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     if(err) {
         // Handle error
@@ -157,8 +158,15 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
 
     // View paper
     app.get('/view/:paper_id', stormpath.authenticationRequired, function(req, res) {
-        // Pass paper_id to ejs file
-        res.render('pages/view', {paper_id: req.params.paper_id});
+        // Get paper url
+        db.collection('papers').findOne({ _id: new mongo.ObjectID(req.params.paper_id) }, function(err, doc) {
+            var url = '';
+
+            if (doc) {
+                // Pass paper_id to ejs file
+                res.render('pages/view', { paper_id: req.params.paper_id, paper_url: doc.url });
+            }
+        });
     });
 
     // Create paper
@@ -169,7 +177,7 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     // Update paper
     app.get('/update/:paper_id', stormpath.authenticationRequired, function(req, res) {
         // Pass paper_id to ejs file (enables create to function as edit)
-        res.render('pages/create', {paper_id: req.params.paper_id});
+        res.render('pages/create', { paper_id: req.params.paper_id });
     });
 
     /**
