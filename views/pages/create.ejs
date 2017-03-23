@@ -140,26 +140,33 @@
         }
 
         $(document).ready(function () {
-            // Create list of proofreaders
-            $.getJSON('/api/users', function (data) {
-                var users = data.users;
-                for (var i in users) {
-                    // Create checkbox
-                    var checkbox = $('<input>', {type: 'checkbox', value: users[i]._id});
+            // First get current user
+            $.getJSON('/api/user', function(user) {
+                // Create list of proofreaders
+                $.getJSON('/api/users', function (data) {
+                    var users = data.users;
+                    for (var i in users) {
+                        if (users[i]._id == user._id) {
+                            continue; // Skip current user
+                        }
 
-                    // Wrap in label and div
-                    var label = $('<label>').append(checkbox);
-                    label.append(users[i].fullName); // Add name after input tag
-                    var div = $('<div>', {class: 'checkbox'}).append(label);
+                        // Create checkbox
+                        var checkbox = $('<input>', {type: 'checkbox', value: users[i]._id});
 
-                    // Append to list
-                    $('#proofreaderForm').append(div);
-                }
+                        // Wrap in label and div
+                        var label = $('<label>').append(checkbox);
+                        label.append(users[i].fullName); // Add name after input tag
+                        var div = $('<div>', {class: 'checkbox'}).append(label);
 
-                // Change things if in update mode
-                if (updatePaperId != null) {
-                    doUpdateModeThings(updatePaperId);
-                }
+                        // Append to list
+                        $('#proofreaderForm').append(div);
+                    }
+
+                    // Change things if in update mode
+                    if (updatePaperId != null) {
+                        doUpdateModeThings(updatePaperId);
+                    }
+                });
             });
         });
     </script>
