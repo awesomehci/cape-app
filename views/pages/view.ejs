@@ -78,54 +78,52 @@
 
 
     function generate_table(array) {
-        var tbl = document.createElement("table");
-        tbl.className = "table table-striped";
+        // First thing: get the current logged in user
+        $.getJSON('/api/user', function (user) {
+            var tbl = document.createElement("table");
+            tbl.className = "table table-striped";
 
-        var tblBody = document.createElement("tbody");
+            var tblBody = document.createElement("tbody");
 
-        //Create header
-        var col = ["Status", "Proofreader", "Comments & Edits"];
-        var tr = tbl.insertRow(-1);
+            //Create header
+            var col = ["Status", "Proofreader", "Comments & Edits"];
+            var tr = tbl.insertRow(-1);
 
-        for (var i = 0; i < col.length; i++) {
-            var th = document.createElement("th");      // TABLE HEADER.
-            th.innerHTML = col[i];
-            tr.appendChild(th);
-        }
-
-        // creating all cells
-        for (var i = 0; i < array.length; i++) {
-            // creates a table row
-            var row = document.createElement("tr");
-            var statusCell = document.createElement("td");
-            var nameCell = document.createElement("td");
-            var urlCell = document.createElement("td");
-            var cellText; //holder
-
-            //Setting IDs so that the status symbol will show up
-            if (array[i].responded == false) {
-                statusCell.setAttribute("id", "status_cell_false");
-            }
-            else {
-                statusCell.setAttribute("id", "status_cell_true");
+            for (var i = 0; i < col.length; i++) {
+                var th = document.createElement("th");      // TABLE HEADER.
+                th.innerHTML = col[i];
+                tr.appendChild(th);
             }
 
-            cellText = document.createTextNode(array[i].user.fullName);
-            nameCell.appendChild(cellText);
+            // creating all cells
+            for (var i = 0; i < array.length; i++) {
+                // creates a table row
+                var row = document.createElement("tr");
+                var statusCell = document.createElement("td");
+                var nameCell = document.createElement("td");
+                var urlCell = document.createElement("td");
+                var cellText; //holder
 
+                //Setting IDs so that the status symbol will show up
+                if (array[i].responded == false) {
+                    statusCell.setAttribute("id", "status_cell_false");
+                }
+                else {
+                    statusCell.setAttribute("id", "status_cell_true");
+                }
 
-            console.log("Array" + array);
+                cellText = document.createTextNode(array[i].user.fullName);
+                nameCell.appendChild(cellText);
 
+                console.log("Array" + array);
 
-            if (array[i].url == null) {
-                var proofreader = array[i].user._id;
-                $.getJSON('/api/user', function (user) {
-                    // Make paper JSON
-                    //if(user._id == )
-                    console.log("User " + proofreader);
-                    console.log("User " + user._id);
+                if (array[i].url == null) { // If the proofreader has not uploaded a paper
+                    var proofreader = array[i].user._id;
 
-                    if (user._id == proofreader) {
+                    console.log("Proofreader id: " + proofreader);
+                    console.log("Logged in user: " + user._id);
+
+                    if (user._id == proofreader) { // If proofreader matches current user, display upload
                         var choose_file = document.createElement("input");
                         choose_file.setAttribute("type", "file");
                         choose_file.setAttribute("id", "uploadPaper");
@@ -133,36 +131,34 @@
 
                         urlCell.appendChild(choose_file);
                     }
-
-                    else {
+                    else { // Else, don't show anything
                         cellText = document.createTextNode("");
-                        console.log("user is not logged in");
+                        console.log("Proofreader is not logged in");
                         urlCell.appendChild(cellText);
                     }
-                });
+                }
+                else { // Else show the url of the uploaded draft
+                    var link = document.createElement("a");
+                    //link.setAttribute("href", array[i].url, "download", array[i].url);
+                    link.setAttribute("href", array[i].url);
+                    var linkText = document.createTextNode(array[i].url);
 
+                    link.appendChild(linkText);
+                    urlCell.appendChild(link);
+                }
+                row.appendChild(statusCell);
+                row.appendChild(nameCell);
+                row.appendChild(urlCell);
+
+                // add the row to the end of the table body
+                tblBody.appendChild(row);
             }
-            else {
-                var link = document.createElement("a");
-                //link.setAttribute("href", array[i].url, "download", array[i].url);
-                link.setAttribute("href", array[i].url);
-                var linkText = document.createTextNode(array[i].url);
 
-                link.appendChild(linkText);
-                urlCell.appendChild(link);
-            }
-            row.appendChild(statusCell);
-            row.appendChild(nameCell);
-            row.appendChild(urlCell);
-
-            // add the row to the end of the table body
-            tblBody.appendChild(row);
-        }
-
-        // put the <tbody> in the <table>
-        tbl.appendChild(tblBody);
-        // appends <table> into <body>
-        document.getElementById("showData").appendChild(tbl);
+            // put the <tbody> in the <table>
+            tbl.appendChild(tblBody);
+            // appends <table> into <body>
+            document.getElementById("showData").appendChild(tbl);
+        });
     }
 
     function onChange() {
