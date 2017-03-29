@@ -117,6 +117,7 @@
                 };
 
                 // Check preferences
+                /*
                 var prefChecks = $('#preferenceForm').find('input:checkbox').toArray();
                 for (var i in prefChecks) {
                     var prefCheck = prefChecks[i];
@@ -124,8 +125,22 @@
                         $(prefCheck).prop('checked', true);
                     }
                 };
+                */
+                var prefForm = $('#preferenceForm');
+                for (var i in paper.preferences) {
+                    var pref = paper.preferences[i];
+                    var checks = prefForm.find('input:checkbox[value="' + pref + '"]').toArray();
+                    if (checks.length > 0) {
+                        // Check the checkbox
+                        $(checks[0]).prop('checked', true);
+                    } else {
+                        // Add to "other" field
+                        $('#prefOther').val(pref).trigger('change');
+                    }
+                }
 
                 // Check needs
+                /*
                 var needChecks = $('#needForm').find('input:checkbox').toArray();
                 for (var i in needChecks) {
                     var needCheck = needChecks[i];
@@ -133,10 +148,28 @@
                         $(needCheck).prop('checked', true);
                     }
                 };
+                */
+                var needForm = $('#needForm');
+                for (var i in paper.needs) {
+                    var need = paper.needs[i];
+                    var checks = needForm.find('input:checkbox[value="' + need + '"]').toArray();
+                    if (checks.length > 0) {
+                        // Check the checkbox
+                        $(checks[0]).prop('checked', true);
+                    } else {
+                        // Add to "other" field
+                        $('#needOther').val(need).trigger('change');
+                    }
+                }
             }).fail(function(data) {
                 // No paper found with this id! Escape back to dashboard
                 $(location).attr('href', '/');
             });
+        }
+
+        function onChange(element) {
+            // Change the value of the checkbox
+            $(element).siblings().children('input:checkbox').val(element.value).prop('checked', true);
         }
 
         $(document).ready(function () {
@@ -258,6 +291,12 @@
                         I only want comments
                     </label>
                 </div>
+                <div class="checkbox form-inline">
+                    <label>
+                        <input type="checkbox" value="">
+                    </label>
+                    <input id="prefOther" type="text" value="" onchange="onChange(this)" placeholder="Other">
+                </div>
             </form>
             <hr/>
         </div>
@@ -284,6 +323,12 @@
                         <input type="checkbox" value="I need help soon">
                         I need help soon
                     </label>
+                </div>
+                <div class="checkbox form-inline">
+                    <label>
+                        <input type="checkbox" value="">
+                    </label>
+                    <input id="needOther" type="text" value="" onchange="onChange(this)" placeholder="Other">
                 </div>
             </form>
         </div>
