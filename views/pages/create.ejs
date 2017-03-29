@@ -44,13 +44,19 @@
                     var prefList = [];
                     var prefChecks = $('#preferenceForm').find('input:checkbox:checked').toArray();
                     for (var i in prefChecks) {
-                        prefList.push(prefChecks[i].value);
+                        var value = prefChecks[i].value;
+                        if (value && value.trim().length > 0) {
+                            prefList.push(value);
+                        }
                     }
 
                     var needList = [];
                     var needChecks = $('#needForm').find('input:checkbox:checked').toArray();
                     for (var i in needChecks) {
-                        needList.push(needChecks[i].value);
+                        var value = needChecks[i].value;
+                        if (value && value.trim().length > 0) {
+                            needList.push(value);
+                        }
                     }
 
                     // Make paper JSON
@@ -149,9 +155,9 @@
                     }
                 };
                 */
-                var needForm = $('#needForm');
+                var needForm = $('#neederenceForm');
                 for (var i in paper.needs) {
-                    var need = paper.needs[i];
+                    var need = paper.neederences[i];
                     var checks = needForm.find('input:checkbox[value="' + need + '"]').toArray();
                     if (checks.length > 0) {
                         // Check the checkbox
